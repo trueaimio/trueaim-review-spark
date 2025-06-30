@@ -147,10 +147,17 @@ const ReviewGenerator = () => {
           {currentStep === 'emoji' && (
             <div className="text-center flex-1 flex flex-col justify-center">
               <div className="mb-8">
+                <div className="flex justify-center mb-6">
+                  <img 
+                    src="/lovable-uploads/f963d4bd-aaca-412f-aad0-ad4b4119a63c.png" 
+                    alt="TrueAim AI Logo" 
+                    className="h-16 w-16 object-contain"
+                  />
+                </div>
                 <h1 className="text-3xl font-bold text-gray-800 mb-2">
                   How was your experience with
                 </h1>
-                <div className="text-4xl font-bold bg-gradient-to-r from-purple-700 to-indigo-700 bg-clip-text text-transparent">
+                <div className="text-4xl font-bold bg-gradient-to-r from-purple-800 to-indigo-800 bg-clip-text text-transparent">
                   TrueAim AI?
                 </div>
               </div>
@@ -160,13 +167,13 @@ const ReviewGenerator = () => {
                   <button
                     key={emoji}
                     onClick={() => handleEmojiSelect(emoji, label)}
-                    className="group flex flex-col items-center p-6 rounded-2xl border-2 border-gray-200 transition-all duration-300 hover:scale-105 hover:border-purple-500 hover:bg-purple-50 focus:outline-none focus:ring-4 focus:ring-purple-300"
+                    className="group flex flex-col items-center p-6 rounded-2xl border-2 border-gray-200 transition-all duration-300 hover:scale-105 hover:border-purple-600 hover:bg-purple-50 focus:outline-none focus:ring-4 focus:ring-purple-400"
                     aria-label={`Select ${label}`}
                   >
                     <div className="text-6xl mb-2 group-hover:scale-110 transition-transform duration-300">
                       {emoji}
                     </div>
-                    <span className="text-sm font-medium text-gray-600 group-hover:text-purple-700">
+                    <span className="text-sm font-medium text-gray-600 group-hover:text-purple-800">
                       {label}
                     </span>
                   </button>
@@ -211,10 +218,10 @@ const ReviewGenerator = () => {
                     <button
                       key={option}
                       onClick={() => handlePreferenceToggle(option)}
-                      className={`px-6 py-3 rounded-full text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-purple-300 ${
+                      className={`px-6 py-3 rounded-full text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-purple-400 ${
                         reviewData.preferences.includes(option)
-                          ? 'bg-purple-700 text-white shadow-lg scale-105'
-                          : 'bg-gray-100 text-gray-700 hover:bg-purple-100 hover:text-purple-800'
+                          ? 'bg-purple-800 text-white shadow-lg scale-105'
+                          : 'bg-gray-100 text-gray-700 hover:bg-purple-100 hover:text-purple-900'
                       }`}
                     >
                       {option}
@@ -227,20 +234,20 @@ const ReviewGenerator = () => {
                     placeholder="Or write your own..."
                     value={reviewData.customText}
                     onChange={(e) => handleCustomTextChange(e.target.value)}
-                    className="text-center border-2 border-gray-200 focus:border-purple-500 rounded-xl py-3 text-lg"
+                    className="text-center border-2 border-gray-200 focus:border-purple-600 rounded-xl py-3 text-lg"
                   />
                 </div>
                 
                 {/* Real-time generated review display */}
                 {generatedReview && (
                   <div className="max-w-lg mx-auto mt-6">
-                    <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-6 border-2 border-purple-300">
+                    <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-6 border-2 border-purple-400">
                       <p className="text-lg text-gray-800 leading-relaxed text-center mb-4">
                         "{generatedReview}"
                       </p>
                       <Button
                         onClick={handleCopyAndSubmit}
-                        className="w-full px-8 py-4 text-lg font-semibold bg-purple-700 hover:bg-purple-800 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group"
+                        className="w-full px-8 py-4 text-lg font-semibold bg-purple-800 hover:bg-purple-900 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group"
                         disabled={isCopied}
                       >
                         {isCopied ? (
@@ -266,7 +273,6 @@ const ReviewGenerator = () => {
           {currentStep === 'loading' && (
             <div className="text-center flex-1 flex flex-col justify-center animate-fade-in">
               <div className="mb-8">
-                <div className="text-6xl mb-4">🚀</div>
                 <h2 className="text-3xl font-bold text-gray-800 mb-4">Almost there!</h2>
                 <p className="text-xl text-gray-600 mb-8">
                   When you get to Google, just paste and you're ready to go!
