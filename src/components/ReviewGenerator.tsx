@@ -12,7 +12,7 @@ interface ReviewData {
 }
 
 const ReviewGenerator = () => {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [selectedEmoji, setSelectedEmoji] = useState<string>('');
   const [reviewData, setReviewData] = useState<ReviewData>({
     emoji: '',
     emojiLabel: '',
@@ -20,14 +20,15 @@ const ReviewGenerator = () => {
     customText: ''
   });
   const [generatedReview, setGeneratedReview] = useState('');
+  const [showPreferences, setShowPreferences] = useState(false);
+  const [showReview, setShowReview] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
 
   const emojis = [
-    { emoji: '😊', label: 'Great' },
-    { emoji: '😍', label: 'Loved it!' },
-    { emoji: '🤩', label: 'Amazing' },
-    { emoji: '👍', label: 'Very Good' },
-    { emoji: '🧠', label: 'Insightful' }
+    { emoji: '😃', label: 'Excellent' },
+    { emoji: '🙂', label: 'Good' },
+    { emoji: '😐', label: 'Ok' },
+    { emoji: '☹️', label: 'Bad' }
   ];
 
   const preferenceOptions = [
@@ -40,8 +41,11 @@ const ReviewGenerator = () => {
   ];
 
   const handleEmojiSelect = (emoji: string, label: string) => {
+    setSelectedEmoji(emoji);
     setReviewData(prev => ({ ...prev, emoji, emojiLabel: label }));
-    setTimeout(() => setCurrentStep(2), 300);
+    setShowPreferences(true);
+    setShowReview(false);
+    setGeneratedReview('');
   };
 
   const handlePreferenceToggle = (preference: string) => {
@@ -77,7 +81,7 @@ const ReviewGenerator = () => {
     }
 
     setGeneratedReview(selectedTemplate);
-    setCurrentStep(3);
+    setShowReview(true);
   };
 
   const handleCopyAndRedirect = async () => {
@@ -107,137 +111,139 @@ const ReviewGenerator = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
-        {/* Step 1: Emoji Selection */}
-        {currentStep === 1 && (
-          <div className="bg-white rounded-3xl shadow-xl p-8 text-center animate-fade-in">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                How was your experience with
-              </h1>
-              <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                TrueAim AI?
-              </div>
-            </div>
-            
-            <div className="flex justify-center gap-4 flex-wrap">
-              {emojis.map(({ emoji, label }) => (
-                <button
-                  key={emoji}
-                  onClick={() => handleEmojiSelect(emoji, label)}
-                  className="group flex flex-col items-center p-6 rounded-2xl border-2 border-gray-200 hover:border-purple-400 hover:bg-purple-50 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-200"
-                  aria-label={`Select ${label}`}
-                >
-                  <div className="text-6xl mb-2 group-hover:scale-110 transition-transform duration-300">
-                    {emoji}
-                  </div>
-                  <span className="text-sm font-medium text-gray-600 group-hover:text-purple-600">
-                    {label}
-                  </span>
-                </button>
-              ))}
+        {/* Emoji Selection - Always Visible */}
+        <div className="bg-white rounded-3xl shadow-xl p-8 text-center">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">
+              How was your experience with
+            </h1>
+            <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+              TrueAim AI?
             </div>
           </div>
-        )}
+          
+          <div className="flex justify-center gap-4 flex-wrap mb-8">
+            {emojis.map(({ emoji, label }) => (
+              <button
+                key={emoji}
+                onClick={() => handleEmojiSelect(emoji, label)}
+                className={`group flex flex-col items-center p-6 rounded-2xl border-2 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-200 ${
+                  selectedEmoji === emoji
+                    ? 'border-purple-400 bg-purple-50 scale-105'
+                    : 'border-gray-200 hover:border-purple-400 hover:bg-purple-50'
+                }`}
+                aria-label={`Select ${label}`}
+              >
+                <div className="text-6xl mb-2 group-hover:scale-110 transition-transform duration-300">
+                  {emoji}
+                </div>
+                <span className="text-sm font-medium text-gray-600 group-hover:text-purple-600">
+                  {label}
+                </span>
+              </button>
+            ))}
+          </div>
 
-        {/* Step 2: Preference Selection */}
-        {currentStep === 2 && (
-          <div className="bg-white rounded-3xl shadow-xl p-8 animate-fade-in">
-            <div className="text-center mb-8">
-              <div className="text-5xl mb-4">{reviewData.emoji}</div>
-              <h2 className="text-3xl font-bold text-gray-800 mb-2">Awesome!</h2>
-              <p className="text-xl text-gray-600">What did you like most?</p>
-            </div>
-            
-            <div className="space-y-6">
-              <div className="flex flex-wrap gap-3 justify-center">
-                {preferenceOptions.map((option) => (
-                  <button
-                    key={option}
-                    onClick={() => handlePreferenceToggle(option)}
-                    className={`px-6 py-3 rounded-full text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-purple-200 ${
-                      reviewData.preferences.includes(option)
-                        ? 'bg-purple-600 text-white shadow-lg scale-105'
-                        : 'bg-gray-100 text-gray-700 hover:bg-purple-100 hover:text-purple-700'
+          {/* Preference Selection - Shows when emoji is selected */}
+          {showPreferences && (
+            <div className="border-t pt-8 animate-fade-in">
+              <div className="text-center mb-6">
+                <div className="text-4xl mb-2">{selectedEmoji}</div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">Awesome!</h2>
+                <p className="text-lg text-gray-600">What did you like most?</p>
+              </div>
+              
+              <div className="space-y-6">
+                <div className="flex flex-wrap gap-3 justify-center">
+                  {preferenceOptions.map((option) => (
+                    <button
+                      key={option}
+                      onClick={() => handlePreferenceToggle(option)}
+                      className={`px-6 py-3 rounded-full text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-purple-200 ${
+                        reviewData.preferences.includes(option)
+                          ? 'bg-purple-600 text-white shadow-lg scale-105'
+                          : 'bg-gray-100 text-gray-700 hover:bg-purple-100 hover:text-purple-700'
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+                
+                <div className="max-w-md mx-auto">
+                  <Input
+                    placeholder="Or write your own..."
+                    value={reviewData.customText}
+                    onChange={(e) => handleCustomTextChange(e.target.value)}
+                    className="text-center border-2 border-gray-200 focus:border-purple-400 rounded-xl py-3 text-lg"
+                  />
+                </div>
+                
+                <div className="text-center pt-4">
+                  <Button
+                    onClick={generateReview}
+                    disabled={!canProceed}
+                    className={`px-8 py-4 text-lg font-semibold rounded-xl transition-all duration-300 ${
+                      canProceed
+                        ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-lg hover:shadow-xl'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}
                   >
-                    {option}
-                  </button>
-                ))}
-              </div>
-              
-              <div className="max-w-md mx-auto">
-                <Input
-                  placeholder="Or write your own..."
-                  value={reviewData.customText}
-                  onChange={(e) => handleCustomTextChange(e.target.value)}
-                  className="text-center border-2 border-gray-200 focus:border-purple-400 rounded-xl py-3 text-lg"
-                />
-              </div>
-              
-              <div className="text-center pt-4">
-                <Button
-                  onClick={generateReview}
-                  disabled={!canProceed}
-                  className={`px-8 py-4 text-lg font-semibold rounded-xl transition-all duration-300 ${
-                    canProceed
-                      ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-lg hover:shadow-xl'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
-                >
-                  Generate Review
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Step 3: Generated Review */}
-        {currentStep === 3 && (
-          <div className="bg-white rounded-3xl shadow-xl p-8 animate-fade-in">
-            <div className="text-center mb-8">
-              <div className="text-5xl mb-4">{reviewData.emoji}</div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Your Review is Ready!</h2>
-              <p className="text-gray-600">Here's what we generated for you:</p>
-            </div>
-            
-            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-6 mb-8 border-2 border-purple-200">
-              <p className="text-lg text-gray-800 leading-relaxed text-center">
-                "{generatedReview}"
-              </p>
-            </div>
-            
-            <div className="text-center space-y-4">
-              <p className="text-gray-600 mb-4">
-                You're almost done! Just click below to leave your review on Google.
-              </p>
-              
-              <Button
-                onClick={handleCopyAndRedirect}
-                className="px-8 py-4 text-lg font-semibold bg-green-600 hover:bg-green-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group"
-                disabled={isCopied}
-              >
-                {isCopied ? (
-                  <>
-                    <CheckCircle className="mr-2 h-5 w-5" />
-                    Copied! Redirecting...
-                  </>
-                ) : (
-                  <>
-                    <Copy className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
-                    📋 Copy & Leave Review
-                  </>
-                )}
-              </Button>
-              
-              {isCopied && (
-                <div className="text-green-600 text-sm animate-fade-in">
-                  ✅ Review copied to clipboard! Opening Google Reviews...
+                    Generate Review
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
                 </div>
-              )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {/* Generated Review - Shows when review is generated */}
+          {showReview && (
+            <div className="border-t pt-8 animate-fade-in">
+              <div className="text-center mb-6">
+                <div className="text-4xl mb-2">{selectedEmoji}</div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">Your Review is Ready!</h2>
+                <p className="text-gray-600">Here's what we generated for you:</p>
+              </div>
+              
+              <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-6 mb-6 border-2 border-purple-200">
+                <p className="text-lg text-gray-800 leading-relaxed text-center">
+                  "{generatedReview}"
+                </p>
+              </div>
+              
+              <div className="text-center space-y-4">
+                <p className="text-gray-600 mb-4">
+                  You're almost done! Just click below to leave your review on Google.
+                </p>
+                
+                <Button
+                  onClick={handleCopyAndRedirect}
+                  className="px-8 py-4 text-lg font-semibold bg-green-600 hover:bg-green-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group"
+                  disabled={isCopied}
+                >
+                  {isCopied ? (
+                    <>
+                      <CheckCircle className="mr-2 h-5 w-5" />
+                      Copied! Redirecting...
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
+                      📋 Copy & Leave Review
+                    </>
+                  )}
+                </Button>
+                
+                {isCopied && (
+                  <div className="text-green-600 text-sm animate-fade-in">
+                    ✅ Review copied to clipboard! Opening Google Reviews...
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
