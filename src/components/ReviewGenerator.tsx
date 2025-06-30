@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Copy, ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -113,7 +112,7 @@ Generate only the review text, no quotes or extra formatting.`;
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-4',
+          model: 'gpt-3.5-turbo',
           messages: [
             {
               role: 'system',
@@ -124,8 +123,8 @@ Generate only the review text, no quotes or extra formatting.`;
               content: prompt
             }
           ],
-          max_tokens: 200,
-          temperature: 0.8,
+          max_tokens: 150,
+          temperature: 0.9,
         }),
       });
 
@@ -167,12 +166,12 @@ Generate only the review text, no quotes or extra formatting.`;
             clearInterval(interval);
             setTimeout(() => {
               window.open('https://g.page/r/trueaim-ai/review', '_blank');
-            }, 500);
+            }, 200);
             return 100;
           }
-          return prev + 2;
+          return prev + 10;
         });
-      }, 100);
+      }, 50);
       
     } catch (error) {
       console.error('Failed to copy text:', error);
