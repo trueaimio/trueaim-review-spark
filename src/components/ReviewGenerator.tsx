@@ -22,6 +22,7 @@ const ReviewGenerator = () => {
   const [generatedReview, setGeneratedReview] = useState('');
   const [showPreferences, setShowPreferences] = useState(false);
   const [showReview, setShowReview] = useState(false);
+  const [showNegativeFeedback, setShowNegativeFeedback] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
 
   const emojis = [
@@ -43,8 +44,19 @@ const ReviewGenerator = () => {
   const handleEmojiSelect = (emoji: string, label: string) => {
     setSelectedEmoji(emoji);
     setReviewData(prev => ({ ...prev, emoji, emojiLabel: label }));
-    setShowPreferences(true);
-    setShowReview(false);
+    
+    // Show negative feedback for Ok and Bad ratings
+    if (label === 'Ok' || label === 'Bad') {
+      setShowNegativeFeedback(true);
+      setShowPreferences(false);
+      setShowReview(false);
+    } else {
+      // Show preferences for positive ratings
+      setShowPreferences(true);
+      setShowNegativeFeedback(false);
+      setShowReview(false);
+    }
+    
     setGeneratedReview('');
   };
 
@@ -144,7 +156,30 @@ const ReviewGenerator = () => {
             ))}
           </div>
 
-          {/* Preference Selection - Shows when emoji is selected */}
+          {/* Negative Feedback - Shows for Ok/Bad ratings */}
+          {showNegativeFeedback && (
+            <div className="border-t pt-8 animate-fade-in">
+              <div className="text-center">
+                <div className="text-4xl mb-4">{selectedEmoji}</div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                  We're sorry you didn't have a good experience
+                </h2>
+                <p className="text-lg text-gray-600 mb-6">
+                  We appreciate your feedback and will work to improve.
+                </p>
+                
+                <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-6">
+                  <div className="flex items-center justify-center gap-2 text-green-700">
+                    <CheckCircle className="h-6 w-6" />
+                    <span className="text-lg font-semibold">Feedback Submitted</span>
+                  </div>
+                  <p className="text-green-600 mt-2">Thank you for taking the time to share your experience with us.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Preference Selection - Shows when positive emoji is selected */}
           {showPreferences && (
             <div className="border-t pt-8 animate-fade-in">
               <div className="text-center mb-6">
