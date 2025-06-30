@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Copy, ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import confetti from 'canvas-confetti';
 
 interface ReviewData {
   emoji: string;
@@ -20,9 +21,7 @@ const ReviewGenerator = () => {
     customText: ''
   });
   const [generatedReview, setGeneratedReview] = useState('');
-  const [showPreferences, setShowPreferences] = useState(false);
-  const [showReview, setShowReview] = useState(false);
-  const [showNegativeFeedback, setShowNegativeFeedback] = useState(false);
+  const [currentStep, setCurrentStep] = useState<'emoji' | 'preferences' | 'review' | 'negative'>('emoji');
   const [isCopied, setIsCopied] = useState(false);
 
   const emojis = [
@@ -41,20 +40,25 @@ const ReviewGenerator = () => {
     'Innovation'
   ];
 
+  const triggerConfetti = () => {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+  };
+
   const handleEmojiSelect = (emoji: string, label: string) => {
     setSelectedEmoji(emoji);
     setReviewData(prev => ({ ...prev, emoji, emojiLabel: label }));
     
-    // Show negative feedback for Ok and Bad ratings
-    if (label === 'Ok' || label === 'Bad') {
-      setShowNegativeFeedback(true);
-      setShowPreferences(false);
-      setShowReview(false);
+    // Trigger confetti for positive ratings
+    if (label === 'Excellent' || label === 'Good') {
+      triggerConfetti();
+      setCurrentStep('preferences');
     } else {
-      // Show preferences for positive ratings
-      setShowPreferences(true);
-      setShowNegativeFeedback(false);
-      setShowReview(false);
+      // Show negative feedback for Ok and Bad ratings
+      setCurrentStep('negative');
     }
     
     setGeneratedReview('');
@@ -93,7 +97,7 @@ const ReviewGenerator = () => {
     }
 
     setGeneratedReview(selectedTemplate);
-    setShowReview(true);
+    setCurrentStep('review');
   };
 
   const handleCopyAndRedirect = async () => {
@@ -123,72 +127,71 @@ const ReviewGenerator = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
-        {/* Emoji Selection - Always Visible */}
-        <div className="bg-white rounded-3xl shadow-xl p-8 text-center">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
-              How was your experience with
-            </h1>
-            <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-              TrueAim AI?
-            </div>
-          </div>
+        <div className="bg-white rounded-3xl shadow-xl p-8 min-h-[600px] flex flex-col">
           
-          <div className="flex justify-center gap-4 flex-wrap mb-8">
-            {emojis.map(({ emoji, label }) => (
-              <button
-                key={emoji}
-                onClick={() => handleEmojiSelect(emoji, label)}
-                className={`group flex flex-col items-center p-6 rounded-2xl border-2 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-200 ${
-                  selectedEmoji === emoji
-                    ? 'border-purple-400 bg-purple-50 scale-105'
-                    : 'border-gray-200 hover:border-purple-400 hover:bg-purple-50'
-                }`}
-                aria-label={`Select ${label}`}
-              >
-                <div className="text-6xl mb-2 group-hover:scale-110 transition-transform duration-300">
-                  {emoji}
+          {/* Emoji Selection Step */}
+          {currentStep === 'emoji' && (
+            <div className="text-center flex-1 flex flex-col justify-center">
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-800 mb-2">
+                  How was your experience with
+                </h1>
+                <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                  TrueAim AI?
                 </div>
-                <span className="text-sm font-medium text-gray-600 group-hover:text-purple-600">
-                  {label}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          {/* Negative Feedback - Shows for Ok/Bad ratings */}
-          {showNegativeFeedback && (
-            <div className="border-t pt-8 animate-fade-in">
-              <div className="text-center">
-                <div className="text-4xl mb-4">{selectedEmoji}</div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                  We're sorry you didn't have a good experience
-                </h2>
-                <p className="text-lg text-gray-600 mb-6">
-                  We appreciate your feedback and will work to improve.
-                </p>
-                
-                <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-6">
-                  <div className="flex items-center justify-center gap-2 text-green-700">
-                    <CheckCircle className="h-6 w-6" />
-                    <span className="text-lg font-semibold">Feedback Submitted</span>
-                  </div>
-                  <p className="text-green-600 mt-2">Thank you for taking the time to share your experience with us.</p>
-                </div>
+              </div>
+              
+              <div className="flex justify-center gap-4 flex-wrap">
+                {emojis.map(({ emoji, label }) => (
+                  <button
+                    key={emoji}
+                    onClick={() => handleEmojiSelect(emoji, label)}
+                    className="group flex flex-col items-center p-6 rounded-2xl border-2 border-gray-200 transition-all duration-300 hover:scale-105 hover:border-purple-400 hover:bg-purple-50 focus:outline-none focus:ring-4 focus:ring-purple-200"
+                    aria-label={`Select ${label}`}
+                  >
+                    <div className="text-6xl mb-2 group-hover:scale-110 transition-transform duration-300">
+                      {emoji}
+                    </div>
+                    <span className="text-sm font-medium text-gray-600 group-hover:text-purple-600">
+                      {label}
+                    </span>
+                  </button>
+                ))}
               </div>
             </div>
           )}
 
-          {/* Preference Selection - Shows when positive emoji is selected */}
-          {showPreferences && (
-            <div className="border-t pt-8 animate-fade-in">
-              <div className="text-center mb-6">
+          {/* Negative Feedback Step */}
+          {currentStep === 'negative' && (
+            <div className="text-center flex-1 flex flex-col justify-center animate-fade-in">
+              <div className="text-4xl mb-4">{selectedEmoji}</div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                We're sorry you didn't have a good experience
+              </h2>
+              <p className="text-lg text-gray-600 mb-6">
+                We appreciate your feedback and will work to improve.
+              </p>
+              
+              <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-6 max-w-md mx-auto">
+                <div className="flex items-center justify-center gap-2 text-green-700">
+                  <CheckCircle className="h-6 w-6" />
+                  <span className="text-lg font-semibold">Feedback Submitted</span>
+                </div>
+                <p className="text-green-600 mt-2">Thank you for taking the time to share your experience with us.</p>
+              </div>
+            </div>
+          )}
+
+          {/* Preference Selection Step */}
+          {currentStep === 'preferences' && (
+            <div className="text-center flex-1 flex flex-col justify-center animate-fade-in">
+              <div className="mb-6">
                 <div className="text-4xl mb-2">{selectedEmoji}</div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">Awesome!</h2>
                 <p className="text-lg text-gray-600">What did you like most?</p>
               </div>
               
-              <div className="space-y-6">
+              <div className="space-y-6 flex-1 flex flex-col justify-center">
                 <div className="flex flex-wrap gap-3 justify-center">
                   {preferenceOptions.map((option) => (
                     <button
@@ -232,10 +235,10 @@ const ReviewGenerator = () => {
             </div>
           )}
 
-          {/* Generated Review - Shows when review is generated */}
-          {showReview && (
-            <div className="border-t pt-8 animate-fade-in">
-              <div className="text-center mb-6">
+          {/* Generated Review Step */}
+          {currentStep === 'review' && (
+            <div className="text-center flex-1 flex flex-col justify-center animate-fade-in">
+              <div className="mb-6">
                 <div className="text-4xl mb-2">{selectedEmoji}</div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">Your Review is Ready!</h2>
                 <p className="text-gray-600">Here's what we generated for you:</p>
