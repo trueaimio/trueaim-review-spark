@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Copy, ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,8 +21,9 @@ const ReviewGenerator = () => {
     customText: ''
   });
   const [generatedReview, setGeneratedReview] = useState('');
-  const [currentStep, setCurrentStep] = useState<'emoji' | 'preferences' | 'review' | 'negative'>('emoji');
+  const [currentStep, setCurrentStep] = useState<'emoji' | 'preferences' | 'review' | 'negative' | 'loading'>('emoji');
   const [isCopied, setIsCopied] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
 
   const emojis = [
     { emoji: '😃', label: 'Excellent' },
@@ -79,37 +80,50 @@ const ReviewGenerator = () => {
 
   const canProceed = reviewData.preferences.length > 0 || reviewData.customText.trim().length > 0;
 
-  const generateReview = () => {
-    const templates = [
-      `I had a ${reviewData.emojiLabel.toLowerCase()} experience with TrueAim AI! Their {feature} really stood out and made everything so much easier. Highly recommend!`,
-      `${reviewData.emojiLabel} working with TrueAim AI! I especially appreciated their {feature}. I'll definitely be coming back.`,
-      `TrueAim AI exceeded my expectations! Their {feature} was impressive and delivered real value. 5 stars!`,
-      `Outstanding experience with TrueAim AI. The {feature} made all the difference in achieving my goals. Highly recommend their services!`
-    ];
+  // Generate review in real time when preferences or custom text changes
+  useEffect(() => {
+    if (currentStep === 'preferences' && canProceed) {
+      const templates = [
+        `I had a ${reviewData.emojiLabel.toLowerCase()} experience with TrueAim AI! Their {feature} really stood out and made everything so much easier. Highly recommend!`,
+        `${reviewData.emojiLabel} working with TrueAim AI! I especially appreciated their {feature}. I'll definitely be coming back.`,
+        `TrueAim AI exceeded my expectations! Their {feature} was impressive and delivered real value. 5 stars!`,
+        `Outstanding experience with TrueAim AI. The {feature} made all the difference in achieving my goals. Highly recommend their services!`
+      ];
 
-    let selectedTemplate = templates[Math.floor(Math.random() * templates.length)];
-    
-    if (reviewData.customText.trim()) {
-      selectedTemplate = selectedTemplate.replace('{feature}', reviewData.customText.trim());
-    } else if (reviewData.preferences.length > 0) {
-      const randomPreference = reviewData.preferences[Math.floor(Math.random() * reviewData.preferences.length)];
-      selectedTemplate = selectedTemplate.replace('{feature}', randomPreference.toLowerCase());
+      let selectedTemplate = templates[Math.floor(Math.random() * templates.length)];
+      
+      if (reviewData.customText.trim()) {
+        selectedTemplate = selectedTemplate.replace('{feature}', reviewData.customText.trim());
+      } else if (reviewData.preferences.length > 0) {
+        const randomPreference = reviewData.preferences[Math.floor(Math.random() * reviewData.preferences.length)];
+        selectedTemplate = selectedTemplate.replace('{feature}', randomPreference.toLowerCase());
+      }
+
+      setGeneratedReview(selectedTemplate);
     }
+  }, [reviewData.preferences, reviewData.customText, reviewData.emojiLabel, currentStep, canProceed]);
 
-    setGeneratedReview(selectedTemplate);
-    setCurrentStep('review');
-  };
-
-  const handleCopyAndRedirect = async () => {
+  const handleCopyAndSubmit = async () => {
     try {
       await navigator.clipboard.writeText(generatedReview);
       setIsCopied(true);
+      setCurrentStep('loading');
+      setLoadingProgress(0);
       
-      setTimeout(() => {
-        window.open('https://g.page/r/trueaim-ai/review', '_blank');
-      }, 1000);
+      // Animate loading bar over 5 seconds
+      const interval = setInterval(() => {
+        setLoadingProgress(prev => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+              window.open('https://g.page/r/trueaim-ai/review', '_blank');
+            }, 500);
+            return 100;
+          }
+          return prev + 2; // 50 steps over 5 seconds
+        });
+      }, 100);
       
-      setTimeout(() => setIsCopied(false), 3000);
     } catch (error) {
       console.error('Failed to copy text:', error);
       // Fallback for older browsers
@@ -120,7 +134,7 @@ const ReviewGenerator = () => {
       document.execCommand('copy');
       document.body.removeChild(textArea);
       setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 3000);
+      setCurrentStep('loading');
     }
   };
 
@@ -136,7 +150,7 @@ const ReviewGenerator = () => {
                 <h1 className="text-3xl font-bold text-gray-800 mb-2">
                   How was your experience with
                 </h1>
-                <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                <div className="text-4xl font-bold bg-gradient-to-r from-purple-700 to-indigo-700 bg-clip-text text-transparent">
                   TrueAim AI?
                 </div>
               </div>
@@ -146,13 +160,13 @@ const ReviewGenerator = () => {
                   <button
                     key={emoji}
                     onClick={() => handleEmojiSelect(emoji, label)}
-                    className="group flex flex-col items-center p-6 rounded-2xl border-2 border-gray-200 transition-all duration-300 hover:scale-105 hover:border-purple-400 hover:bg-purple-50 focus:outline-none focus:ring-4 focus:ring-purple-200"
+                    className="group flex flex-col items-center p-6 rounded-2xl border-2 border-gray-200 transition-all duration-300 hover:scale-105 hover:border-purple-500 hover:bg-purple-50 focus:outline-none focus:ring-4 focus:ring-purple-300"
                     aria-label={`Select ${label}`}
                   >
                     <div className="text-6xl mb-2 group-hover:scale-110 transition-transform duration-300">
                       {emoji}
                     </div>
-                    <span className="text-sm font-medium text-gray-600 group-hover:text-purple-600">
+                    <span className="text-sm font-medium text-gray-600 group-hover:text-purple-700">
                       {label}
                     </span>
                   </button>
@@ -197,10 +211,10 @@ const ReviewGenerator = () => {
                     <button
                       key={option}
                       onClick={() => handlePreferenceToggle(option)}
-                      className={`px-6 py-3 rounded-full text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-purple-200 ${
+                      className={`px-6 py-3 rounded-full text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-purple-300 ${
                         reviewData.preferences.includes(option)
-                          ? 'bg-purple-600 text-white shadow-lg scale-105'
-                          : 'bg-gray-100 text-gray-700 hover:bg-purple-100 hover:text-purple-700'
+                          ? 'bg-purple-700 text-white shadow-lg scale-105'
+                          : 'bg-gray-100 text-gray-700 hover:bg-purple-100 hover:text-purple-800'
                       }`}
                     >
                       {option}
@@ -213,71 +227,62 @@ const ReviewGenerator = () => {
                     placeholder="Or write your own..."
                     value={reviewData.customText}
                     onChange={(e) => handleCustomTextChange(e.target.value)}
-                    className="text-center border-2 border-gray-200 focus:border-purple-400 rounded-xl py-3 text-lg"
+                    className="text-center border-2 border-gray-200 focus:border-purple-500 rounded-xl py-3 text-lg"
                   />
                 </div>
                 
-                <div className="text-center pt-4">
-                  <Button
-                    onClick={generateReview}
-                    disabled={!canProceed}
-                    className={`px-8 py-4 text-lg font-semibold rounded-xl transition-all duration-300 ${
-                      canProceed
-                        ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-lg hover:shadow-xl'
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    }`}
-                  >
-                    Generate Review
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </div>
+                {/* Real-time generated review display */}
+                {generatedReview && (
+                  <div className="max-w-lg mx-auto mt-6">
+                    <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-6 border-2 border-purple-300">
+                      <p className="text-lg text-gray-800 leading-relaxed text-center mb-4">
+                        "{generatedReview}"
+                      </p>
+                      <Button
+                        onClick={handleCopyAndSubmit}
+                        className="w-full px-8 py-4 text-lg font-semibold bg-purple-700 hover:bg-purple-800 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group"
+                        disabled={isCopied}
+                      >
+                        {isCopied ? (
+                          <>
+                            <CheckCircle className="mr-2 h-5 w-5" />
+                            Copied! Redirecting...
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
+                            Copy & Submit
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
 
-          {/* Generated Review Step */}
-          {currentStep === 'review' && (
+          {/* Loading Step */}
+          {currentStep === 'loading' && (
             <div className="text-center flex-1 flex flex-col justify-center animate-fade-in">
-              <div className="mb-6">
-                <div className="text-4xl mb-2">{selectedEmoji}</div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">Your Review is Ready!</h2>
-                <p className="text-gray-600">Here's what we generated for you:</p>
-              </div>
-              
-              <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-6 mb-6 border-2 border-purple-200">
-                <p className="text-lg text-gray-800 leading-relaxed text-center">
-                  "{generatedReview}"
+              <div className="mb-8">
+                <div className="text-6xl mb-4">🚀</div>
+                <h2 className="text-3xl font-bold text-gray-800 mb-4">Almost there!</h2>
+                <p className="text-xl text-gray-600 mb-8">
+                  When you get to Google, just paste and you're ready to go!
                 </p>
               </div>
               
-              <div className="text-center space-y-4">
-                <p className="text-gray-600 mb-4">
-                  You're almost done! Just click below to leave your review on Google.
+              <div className="max-w-md mx-auto w-full">
+                <div className="bg-gray-200 rounded-full h-4 mb-4 overflow-hidden">
+                  <div 
+                    className="bg-gradient-to-r from-green-500 to-green-600 h-full rounded-full transition-all duration-100 ease-out"
+                    style={{ width: `${loadingProgress}%` }}
+                  ></div>
+                </div>
+                <p className="text-green-600 font-semibold">
+                  {loadingProgress < 100 ? `Loading... ${Math.round(loadingProgress)}%` : 'Ready! Opening Google Reviews...'}
                 </p>
-                
-                <Button
-                  onClick={handleCopyAndRedirect}
-                  className="px-8 py-4 text-lg font-semibold bg-green-600 hover:bg-green-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group"
-                  disabled={isCopied}
-                >
-                  {isCopied ? (
-                    <>
-                      <CheckCircle className="mr-2 h-5 w-5" />
-                      Copied! Redirecting...
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
-                      📋 Copy & Leave Review
-                    </>
-                  )}
-                </Button>
-                
-                {isCopied && (
-                  <div className="text-green-600 text-sm animate-fade-in">
-                    ✅ Review copied to clipboard! Opening Google Reviews...
-                  </div>
-                )}
               </div>
             </div>
           )}
