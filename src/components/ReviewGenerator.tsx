@@ -24,6 +24,9 @@ const ReviewGenerator = () => {
   const [currentStep, setCurrentStep] = useState<'emoji' | 'preferences' | 'review' | 'negative' | 'loading'>('emoji');
   const [isCopied, setIsCopied] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [apiKey, setApiKey] = useState('');
+  const [showApiInput, setShowApiInput] = useState(true);
 
   const emojis = [
     { emoji: '😃', label: 'Excellent' },
@@ -33,12 +36,12 @@ const ReviewGenerator = () => {
   ];
 
   const preferenceOptions = [
-    'Customer Service',
-    'Speed of Delivery',
-    'Ease of Use',
-    'Results I Got',
-    'Professionalism',
-    'Innovation'
+    'Ad Targeting Precision',
+    'ROI Improvement',
+    'Consumer Data Insights',
+    'Facebook Ads Integration',
+    'Real-time Analytics',
+    'Customer Support'
   ];
 
   const triggerConfetti = () => {
@@ -53,12 +56,10 @@ const ReviewGenerator = () => {
     setSelectedEmoji(emoji);
     setReviewData(prev => ({ ...prev, emoji, emojiLabel: label }));
     
-    // Trigger confetti for positive ratings
     if (label === 'Excellent' || label === 'Good') {
       triggerConfetti();
       setCurrentStep('preferences');
     } else {
-      // Show negative feedback for Ok and Bad ratings
       setCurrentStep('negative');
     }
     
@@ -78,30 +79,80 @@ const ReviewGenerator = () => {
     setReviewData(prev => ({ ...prev, customText: text }));
   };
 
-  const canProceed = reviewData.preferences.length > 0 || reviewData.customText.trim().length > 0;
+  const generateReviewWithChatGPT = async () => {
+    if (!apiKey.trim()) {
+      alert('Please enter your OpenAI API key first');
+      return;
+    }
 
-  // Generate review in real time when preferences or custom text changes
-  useEffect(() => {
-    if (currentStep === 'preferences' && canProceed) {
-      const templates = [
-        `I had a ${reviewData.emojiLabel.toLowerCase()} experience with TrueAim AI! Their {feature} really stood out and made everything so much easier. Highly recommend!`,
-        `${reviewData.emojiLabel} working with TrueAim AI! I especially appreciated their {feature}. I'll definitely be coming back.`,
-        `TrueAim AI exceeded my expectations! Their {feature} was impressive and delivered real value. 5 stars!`,
-        `Outstanding experience with TrueAim AI. The {feature} made all the difference in achieving my goals. Highly recommend their services!`
-      ];
+    setIsGenerating(true);
+    
+    try {
+      const selectedPreferences = reviewData.preferences.length > 0 
+        ? reviewData.preferences.join(', ') 
+        : reviewData.customText;
 
-      let selectedTemplate = templates[Math.floor(Math.random() * templates.length)];
-      
-      if (reviewData.customText.trim()) {
-        selectedTemplate = selectedTemplate.replace('{feature}', reviewData.customText.trim());
-      } else if (reviewData.preferences.length > 0) {
-        const randomPreference = reviewData.preferences[Math.floor(Math.random() * reviewData.preferences.length)];
-        selectedTemplate = selectedTemplate.replace('{feature}', randomPreference.toLowerCase());
+      const prompt = `Generate a unique, authentic-sounding Google review for TrueAim AI, a company that provides advanced ad targeting systems. They collect data on 250 million consumer profiles with 100 billion buying signals daily and help users target Facebook ads to people specifically looking for their service within the past week.
+
+The review should be ${reviewData.emojiLabel.toLowerCase()} and focus on: ${selectedPreferences}
+
+Requirements:
+- Sound like a real customer experience
+- Be specific about results or benefits
+- Mention the ad targeting capabilities
+- Keep it natural and conversational
+- Around 2-3 sentences
+- Don't use generic language
+
+Generate only the review text, no quotes or extra formatting.`;
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a helpful assistant that generates authentic customer reviews.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          max_tokens: 200,
+          temperature: 0.8,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.statusText}`);
       }
 
-      setGeneratedReview(selectedTemplate);
+      const data = await response.json();
+      const review = data.choices[0]?.message?.content?.trim() || '';
+      
+      setGeneratedReview(review);
+    } catch (error) {
+      console.error('Error generating review:', error);
+      alert('Failed to generate review. Please check your API key and try again.');
+    } finally {
+      setIsGenerating(false);
     }
-  }, [reviewData.preferences, reviewData.customText, reviewData.emojiLabel, currentStep, canProceed]);
+  };
+
+  const canProceed = reviewData.preferences.length > 0 || reviewData.customText.trim().length > 0;
+
+  // Generate review when preferences change and API key is available
+  useEffect(() => {
+    if (currentStep === 'preferences' && canProceed && apiKey.trim()) {
+      generateReviewWithChatGPT();
+    }
+  }, [reviewData.preferences, reviewData.customText, currentStep, apiKey]);
 
   const handleCopyAndSubmit = async () => {
     try {
@@ -110,7 +161,6 @@ const ReviewGenerator = () => {
       setCurrentStep('loading');
       setLoadingProgress(0);
       
-      // Animate loading bar over 5 seconds
       const interval = setInterval(() => {
         setLoadingProgress(prev => {
           if (prev >= 100) {
@@ -120,13 +170,12 @@ const ReviewGenerator = () => {
             }, 500);
             return 100;
           }
-          return prev + 2; // 50 steps over 5 seconds
+          return prev + 2;
         });
       }, 100);
       
     } catch (error) {
       console.error('Failed to copy text:', error);
-      // Fallback for older browsers
       const textArea = document.createElement('textarea');
       textArea.value = generatedReview;
       document.body.appendChild(textArea);
@@ -139,151 +188,185 @@ const ReviewGenerator = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-800 flex items-center justify-center p-4">
-      <div className="w-full max-w-xl">
-        <div className="bg-gray-800/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-700/50 p-8 flex flex-col">
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-2xl mx-auto">
+        <div className="bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 p-8">
           
-          {/* Emoji Selection Step */}
-          {currentStep === 'emoji' && (
-            <div className="text-center space-y-8">
-              <div>
-                <h1 className="text-2xl font-bold text-white mb-2">
-                  How was your experience with
-                </h1>
-                <div className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-indigo-500 bg-clip-text text-transparent">
-                  TrueAim AI?
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                {emojis.map(({ emoji, label }) => (
-                  <button
-                    key={emoji}
-                    onClick={() => handleEmojiSelect(emoji, label)}
-                    className="group flex flex-col items-center p-6 rounded-2xl border-2 border-gray-600/50 bg-gray-700/30 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-blue-500/70 hover:bg-blue-500/10 focus:outline-none focus:ring-4 focus:ring-blue-500/50"
-                    aria-label={`Select ${label}`}
-                  >
-                    <div className="text-4xl mb-2">
-                      {emoji}
-                    </div>
-                    <span className="text-sm font-medium text-gray-300 group-hover:text-blue-300">
-                      {label}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Negative Feedback Step */}
-          {currentStep === 'negative' && (
-            <div className="text-center space-y-6">
-              <div className="text-4xl mb-4">{selectedEmoji}</div>
-              <h2 className="text-xl font-bold text-white mb-4">
-                We're sorry you didn't have a good experience
-              </h2>
-              <p className="text-gray-300 mb-6">
-                We appreciate your feedback and will work to improve.
+          {/* API Key Input */}
+          {showApiInput && (
+            <div className="mb-8 p-6 bg-gray-700/50 rounded-xl border border-gray-600">
+              <h3 className="text-lg font-semibold text-white mb-4">OpenAI API Key Required</h3>
+              <p className="text-gray-300 text-sm mb-4">
+                Enter your OpenAI API key to generate unique reviews with ChatGPT
               </p>
-              
-              <div className="bg-green-900/30 border-2 border-green-600/50 rounded-2xl p-6 backdrop-blur-sm">
-                <div className="flex items-center justify-center gap-2 text-green-400">
-                  <CheckCircle className="h-5 w-5" />
-                  <span className="font-semibold">Feedback Submitted</span>
-                </div>
-                <p className="text-green-300 mt-2 text-sm">Thank you for taking the time to share your experience with us.</p>
+              <div className="flex gap-3">
+                <Input
+                  type="password"
+                  placeholder="sk-..."
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  className="bg-gray-600 border-gray-500 text-white placeholder-gray-400"
+                />
+                <Button
+                  onClick={() => setShowApiInput(false)}
+                  disabled={!apiKey.trim()}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  Continue
+                </Button>
               </div>
             </div>
           )}
 
-          {/* Preference Selection Step */}
-          {currentStep === 'preferences' && (
-            <div className="text-center space-y-6">
-              <div>
-                <div className="text-4xl mb-2">{selectedEmoji}</div>
-                <h2 className="text-xl font-bold text-white mb-2">Awesome!</h2>
-                <p className="text-gray-300">What did you like most?</p>
-              </div>
-              
-              <div className="space-y-4">
-                <div className="flex flex-wrap gap-2 justify-center">
-                  {preferenceOptions.map((option) => (
-                    <button
-                      key={option}
-                      onClick={() => handlePreferenceToggle(option)}
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-500/50 ${
-                        reviewData.preferences.includes(option)
-                          ? 'bg-gradient-to-r from-blue-600 to-purple-700 text-white shadow-lg scale-105 border border-blue-400/50'
-                          : 'bg-gray-700/50 text-gray-300 hover:bg-blue-600/20 hover:text-blue-300 border border-gray-600/50'
-                      }`}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-                
-                <div>
-                  <Input
-                    placeholder="Or write your own..."
-                    value={reviewData.customText}
-                    onChange={(e) => handleCustomTextChange(e.target.value)}
-                    className="text-center border-2 border-gray-600/50 bg-gray-700/30 text-white placeholder-gray-400 focus:border-blue-500/70 focus:bg-gray-700/50 rounded-xl py-3 backdrop-blur-sm"
-                  />
-                </div>
-                
-                {/* Real-time generated review display */}
-                {generatedReview && (
-                  <div className="mt-6">
-                    <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 rounded-2xl p-6 border-2 border-blue-500/30 backdrop-blur-sm">
-                      <p className="text-gray-200 leading-relaxed text-center mb-4">
-                        "{generatedReview}"
-                      </p>
-                      <Button
-                        onClick={handleCopyAndSubmit}
-                        className="w-full px-6 py-3 font-semibold bg-gradient-to-r from-blue-600 to-purple-700 hover:from-blue-700 hover:to-purple-800 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group border border-blue-500/30"
-                        disabled={isCopied}
-                      >
-                        {isCopied ? (
-                          <>
-                            <CheckCircle className="mr-2 h-4 w-4" />
-                            Copied! Redirecting...
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" />
-                            Copy & Submit
-                          </>
-                        )}
-                      </Button>
+          {!showApiInput && (
+            <>
+              {/* Emoji Selection Step */}
+              {currentStep === 'emoji' && (
+                <div className="text-center space-y-8">
+                  <div>
+                    <h1 className="text-3xl font-bold text-white mb-4">
+                      How was your experience with
+                    </h1>
+                    <div className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                      TrueAim AI?
                     </div>
                   </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Loading Step */}
-          {currentStep === 'loading' && (
-            <div className="text-center space-y-6">
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-4">Almost there!</h2>
-                <p className="text-gray-300 mb-8">
-                  When you get to Google, just paste and you're ready to go!
-                </p>
-              </div>
-              
-              <div className="max-w-sm mx-auto w-full">
-                <div className="bg-gray-700/50 rounded-full h-4 mb-4 overflow-hidden border border-gray-600/50">
-                  <div 
-                    className="bg-gradient-to-r from-green-500 to-emerald-500 h-full rounded-full transition-all duration-100 ease-out shadow-lg"
-                    style={{ width: `${loadingProgress}%` }}
-                  ></div>
+                  
+                  <div className="grid grid-cols-2 gap-6">
+                    {emojis.map(({ emoji, label }) => (
+                      <button
+                        key={emoji}
+                        onClick={() => handleEmojiSelect(emoji, label)}
+                        className="flex flex-col items-center p-8 rounded-xl border-2 border-gray-600 bg-gray-700/30 transition-all duration-300 hover:scale-105 hover:border-blue-500 hover:bg-blue-500/10"
+                      >
+                        <div className="text-5xl mb-3">{emoji}</div>
+                        <span className="text-lg font-medium text-gray-300">{label}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <p className="text-green-400 font-semibold">
-                  {loadingProgress < 100 ? `Loading... ${Math.round(loadingProgress)}%` : 'Ready! Opening Google Reviews...'}
-                </p>
-              </div>
-            </div>
+              )}
+
+              {/* Negative Feedback Step */}
+              {currentStep === 'negative' && (
+                <div className="text-center space-y-6">
+                  <div className="text-5xl mb-4">{selectedEmoji}</div>
+                  <h2 className="text-2xl font-bold text-white mb-4">
+                    We're sorry you didn't have a good experience
+                  </h2>
+                  <p className="text-gray-300 mb-6">
+                    We appreciate your feedback and will work to improve.
+                  </p>
+                  
+                  <div className="bg-green-900/30 border-2 border-green-600/50 rounded-xl p-6">
+                    <div className="flex items-center justify-center gap-2 text-green-400">
+                      <CheckCircle className="h-5 w-5" />
+                      <span className="font-semibold">Feedback Submitted</span>
+                    </div>
+                    <p className="text-green-300 mt-2 text-sm">Thank you for taking the time to share your experience with us.</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Preference Selection Step */}
+              {currentStep === 'preferences' && (
+                <div className="text-center space-y-6">
+                  <div>
+                    <div className="text-5xl mb-4">{selectedEmoji}</div>
+                    <h2 className="text-2xl font-bold text-white mb-2">Awesome!</h2>
+                    <p className="text-gray-300">What impressed you most about TrueAim AI?</p>
+                  </div>
+                  
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-2 gap-3">
+                      {preferenceOptions.map((option) => (
+                        <button
+                          key={option}
+                          onClick={() => handlePreferenceToggle(option)}
+                          className={`p-4 rounded-lg text-sm font-medium transition-all duration-300 ${
+                            reviewData.preferences.includes(option)
+                              ? 'bg-blue-600 text-white border-2 border-blue-400'
+                              : 'bg-gray-700 text-gray-300 hover:bg-gray-600 border-2 border-gray-600'
+                          }`}
+                        >
+                          {option}
+                        </button>
+                      ))}
+                    </div>
+                    
+                    <div>
+                      <Input
+                        placeholder="Or describe your own experience..."
+                        value={reviewData.customText}
+                        onChange={(e) => handleCustomTextChange(e.target.value)}
+                        className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                      />
+                    </div>
+                    
+                    {/* Generated review display */}
+                    {(generatedReview || isGenerating) && (
+                      <div className="mt-6">
+                        <div className="bg-gray-700/50 rounded-xl p-6 border border-gray-600">
+                          {isGenerating ? (
+                            <div className="text-center">
+                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-3"></div>
+                              <p className="text-gray-300">Generating your unique review...</p>
+                            </div>
+                          ) : (
+                            <>
+                              <p className="text-gray-200 leading-relaxed mb-4 text-left">
+                                "{generatedReview}"
+                              </p>
+                              <Button
+                                onClick={handleCopyAndSubmit}
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                                disabled={isCopied}
+                              >
+                                {isCopied ? (
+                                  <>
+                                    <CheckCircle className="mr-2 h-4 w-4" />
+                                    Copied! Redirecting...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="mr-2 h-4 w-4" />
+                                    Copy & Submit Review
+                                  </>
+                                )}
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Loading Step */}
+              {currentStep === 'loading' && (
+                <div className="text-center space-y-6">
+                  <div>
+                    <h2 className="text-2xl font-bold text-white mb-4">Almost there!</h2>
+                    <p className="text-gray-300 mb-8">
+                      When you get to Google, just paste and you're ready to go!
+                    </p>
+                  </div>
+                  
+                  <div className="max-w-sm mx-auto w-full">
+                    <div className="bg-gray-700 rounded-full h-4 mb-4 overflow-hidden">
+                      <div 
+                        className="bg-gradient-to-r from-green-500 to-emerald-500 h-full rounded-full transition-all duration-100"
+                        style={{ width: `${loadingProgress}%` }}
+                      ></div>
+                    </div>
+                    <p className="text-green-400 font-semibold">
+                      {loadingProgress < 100 ? `Loading... ${Math.round(loadingProgress)}%` : 'Ready! Opening Google Reviews...'}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
