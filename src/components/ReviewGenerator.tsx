@@ -37,17 +37,17 @@ const ReviewGenerator = () => {
   ];
 
   const preferenceOptions = [
-    'Precise Ad Targeting',
-    'ROI Improvement',
-    'Consumer Data Insights',
-    'Facebook Ads Integration',
-    'Real-time Analytics',
-    'Customer Support'
+    'Customer Support',
+    'Ease of Set Up',
+    'Improved Ad ROI',
+    'Precision Targeting',
+    'Better Lead Quality',
+    'Everything'
   ];
 
   const triggerConfetti = () => {
     confetti({
-      particleCount: 50,
+      particleCount: 25,
       spread: 70,
       origin: { y: 0.6 }
     });
@@ -88,19 +88,27 @@ const ReviewGenerator = () => {
         ? reviewData.preferences.join(', ') 
         : reviewData.customText;
 
-      const prompt = `Generate a unique, authentic-sounding Google review for TrueAim AI, a company that provides advanced ad targeting systems. They collect data on 250 million consumer profiles with 100 billion buying signals daily and help users target Facebook ads to people specifically looking for their service within the past week.
+      const prompt = `You are writing a genuine Google review for TrueAim AI, a cutting-edge ad targeting platform. TrueAim AI provides access to 250+ million consumer profiles with 100+ billion real-time buying signals, helping businesses target Facebook ads to people who are actively looking for their services within the past week.
 
-The review should be ${reviewData.emojiLabel.toLowerCase()} and focus on: ${selectedPreferences}
+Write a ${reviewData.emojiLabel.toLowerCase()} review focusing on: ${selectedPreferences}
 
-Requirements:
-- Sound like a real customer experience
-- Be specific about results or benefits
-- Mention the ad targeting capabilities
-- Keep it natural and conversational
-- Around 2-3 sentences
-- Don't use generic language
+The review should:
+- Sound like it's from a real business owner or marketer who actually used the service
+- Include specific, believable results or improvements (use realistic numbers/percentages)
+- Mention how it helped with Facebook ad targeting specifically
+- Be conversational and authentic, not overly promotional
+- Include natural language patterns and personal touches
+- Be 2-4 sentences long
+- Avoid generic marketing language
 
-Generate only the review text, no quotes or extra formatting.`;
+Examples of good authentic touches:
+- "Finally found a solution that actually works"
+- "Within the first week I noticed..."
+- "As someone who's tried everything..."
+- "The difference was night and day"
+- "Honestly didn't expect much but..."
+
+Write ONLY the review text, no quotes or formatting.`;
 
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -109,19 +117,19 @@ Generate only the review text, no quotes or extra formatting.`;
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
+          model: 'gpt-4.1-2025-04-14',
           messages: [
             {
               role: 'system',
-              content: 'You are a helpful assistant that generates authentic customer reviews.'
+              content: 'You are an expert at writing authentic, natural-sounding customer reviews that feel genuine and specific.'
             },
             {
               role: 'user',
               content: prompt
             }
           ],
-          max_tokens: 150,
-          temperature: 0.9,
+          max_tokens: 200,
+          temperature: 0.8,
         }),
       });
 
@@ -168,7 +176,7 @@ Generate only the review text, no quotes or extra formatting.`;
           }
           return prev + 10;
         });
-      }, 200);
+      }, 400);
       
     } catch (error) {
       console.error('Failed to copy text:', error);
