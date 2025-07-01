@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Copy, ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import confetti from 'canvas-confetti';
 
 interface ReviewData {
@@ -22,6 +23,7 @@ const ReviewGenerator = () => {
   const [isCopied, setIsCopied] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generationProgress, setGenerationProgress] = useState(0);
   
   // Use the provided API key directly
   const apiKey = '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';
@@ -76,6 +78,17 @@ const ReviewGenerator = () => {
 
   const generateReviewWithChatGPT = async () => {
     setIsGenerating(true);
+    setGenerationProgress(0);
+    
+    // Simulate progress during API call
+    const progressInterval = setInterval(() => {
+      setGenerationProgress(prev => {
+        if (prev < 80) {
+          return prev + Math.random() * 15;
+        }
+        return prev;
+      });
+    }, 200);
     
     try {
       const selectedPreferences = reviewData.preferences.join(', ');
@@ -166,6 +179,9 @@ Write ONLY the review text, no quotes or formatting. Make sure to create a uniqu
         }),
       });
 
+      clearInterval(progressInterval);
+      setGenerationProgress(100);
+
       if (!response.ok) {
         throw new Error(`API request failed: ${response.statusText}`);
       }
@@ -189,8 +205,10 @@ Write ONLY the review text, no quotes or formatting. Make sure to create a uniqu
     } catch (error) {
       console.error('Error generating review:', error);
       alert('Failed to generate review. Please try again.');
+      clearInterval(progressInterval);
     } finally {
       setIsGenerating(false);
+      setGenerationProgress(0);
     }
   };
 
@@ -322,9 +340,16 @@ Write ONLY the review text, no quotes or formatting. Make sure to create a uniqu
                   <div className="mt-6">
                     <div className="bg-gray-700/50 rounded-xl p-6 border border-gray-600">
                       {isGenerating ? (
-                        <div className="text-center">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-3"></div>
-                          <p className="text-gray-300">Generating your unique review...</p>
+                        <div className="space-y-4">
+                          <div className="text-center">
+                            <p className="text-gray-300 mb-4">Generating your unique review...</p>
+                            <div className="max-w-xs mx-auto">
+                              <Progress value={generationProgress} className="h-3 mb-2" />
+                              <p className="text-sm text-blue-400 font-medium">
+                                {Math.round(generationProgress)}% complete
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       ) : (
                         <>
