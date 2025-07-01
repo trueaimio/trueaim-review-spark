@@ -2,14 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { Copy, ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import confetti from 'canvas-confetti';
 
 interface ReviewData {
   emoji: string;
   emojiLabel: string;
   preferences: string[];
-  customText: string;
 }
 
 const ReviewGenerator = () => {
@@ -17,8 +15,7 @@ const ReviewGenerator = () => {
   const [reviewData, setReviewData] = useState<ReviewData>({
     emoji: '',
     emojiLabel: '',
-    preferences: [],
-    customText: ''
+    preferences: []
   });
   const [generatedReview, setGeneratedReview] = useState('');
   const [currentStep, setCurrentStep] = useState<'emoji' | 'preferences' | 'review' | 'negative' | 'loading'>('emoji');
@@ -77,20 +74,14 @@ const ReviewGenerator = () => {
     }));
   };
 
-  const handleCustomTextChange = (text: string) => {
-    setReviewData(prev => ({ ...prev, customText: text }));
-  };
-
   const generateReviewWithChatGPT = async () => {
     setIsGenerating(true);
     
     try {
-      const selectedPreferences = reviewData.preferences.length > 0 
-        ? reviewData.preferences.join(', ') 
-        : reviewData.customText;
+      const selectedPreferences = reviewData.preferences.join(', ');
 
       // Create a unique prompt that includes the specific combination of preferences
-      const combinationKey = reviewData.preferences.sort().join('|') + '|' + reviewData.customText;
+      const combinationKey = reviewData.preferences.sort().join('|');
       
       // Create specific messaging for Ease of Set Up
       const easeOfSetUpDetails = reviewData.preferences.includes('Ease of Set Up') 
@@ -115,7 +106,9 @@ ${easeOfSetUpDetails}The review should:
 - Be 2-4 sentences long
 - Avoid generic marketing language
 - Address each selected preference area in a natural way
-- Do NOT use em dashes (—) in the review text
+- ABSOLUTELY NEVER use em dashes (—) anywhere in the text
+- Use regular hyphens (-) or commas instead of em dashes
+- Replace any em dash with a comma, period, or regular hyphen
 
 Selected combination: ${combinationKey}
 
@@ -126,7 +119,7 @@ Examples of good authentic touches:
 - "The difference was night and day"
 - "Honestly didn't expect much but..."
 
-Write ONLY the review text, no quotes or formatting. Make sure to create a unique review for this specific combination of preferences.`;
+Write ONLY the review text, no quotes or formatting. Make sure to create a unique review for this specific combination of preferences. NEVER use em dashes (—) in any part of the review.`;
 
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -139,7 +132,7 @@ Write ONLY the review text, no quotes or formatting. Make sure to create a uniqu
           messages: [
             {
               role: 'system',
-              content: 'You are an expert at writing authentic, natural-sounding customer reviews that feel genuine and specific. Each review should be unique and address the specific combination of preferences mentioned. Never use em dashes (—) in your reviews.'
+              content: 'You are an expert at writing authentic, natural-sounding customer reviews that feel genuine and specific. Each review should be unique and address the specific combination of preferences mentioned. NEVER use em dashes (—) in your reviews. Always use regular hyphens (-), commas, or periods instead of em dashes. If you would normally use an em dash, replace it with a comma or split into separate sentences.'
             },
             {
               role: 'user',
@@ -156,7 +149,10 @@ Write ONLY the review text, no quotes or formatting. Make sure to create a uniqu
       }
 
       const data = await response.json();
-      const review = data.choices[0]?.message?.content?.trim() || '';
+      let review = data.choices[0]?.message?.content?.trim() || '';
+      
+      // Additional safety check to remove any em dashes that might slip through
+      review = review.replace(/—/g, ', ');
       
       setGeneratedReview(review);
     } catch (error) {
@@ -167,16 +163,16 @@ Write ONLY the review text, no quotes or formatting. Make sure to create a uniqu
     }
   };
 
-  const canProceed = reviewData.preferences.length > 0 || reviewData.customText.trim().length > 0;
+  const canProceed = reviewData.preferences.length > 0;
 
-  // Generate review whenever preferences or custom text changes
+  // Generate review whenever preferences change
   useEffect(() => {
     if (currentStep === 'preferences' && canProceed) {
       // Clear previous review immediately to show loading state
       setGeneratedReview('');
       generateReviewWithChatGPT();
     }
-  }, [reviewData.preferences, reviewData.customText, currentStep]);
+  }, [reviewData.preferences, currentStep]);
 
   const handleCopyAndSubmit = async () => {
     try {
@@ -288,15 +284,6 @@ Write ONLY the review text, no quotes or formatting. Make sure to create a uniqu
                       {option}
                     </button>
                   ))}
-                </div>
-                
-                <div>
-                  <Input
-                    placeholder="Or describe your own experience..."
-                    value={reviewData.customText}
-                    onChange={(e) => handleCustomTextChange(e.target.value)}
-                    className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                  />
                 </div>
                 
                 {/* Generated review display */}
