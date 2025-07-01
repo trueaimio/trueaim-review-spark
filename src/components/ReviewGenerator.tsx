@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Copy, ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -342,13 +343,30 @@ Write ONLY the review text, no quotes or formatting. Make this review completely
           if (prev >= 100) {
             clearInterval(interval);
             setTimeout(() => {
-              // Simplified mobile redirect with better compatibility
+              // Mobile-optimized redirect for Google Reviews
               const googleReviewUrl = 'https://g.page/r/CYJQ22pZhgZwEBM/review';
               
               console.log('Attempting to open Google Reviews URL:', googleReviewUrl);
               
-              // Try window.location.href as the most reliable method for mobile
-              window.location.href = googleReviewUrl;
+              // Create a temporary link element and simulate click
+              const link = document.createElement('a');
+              link.href = googleReviewUrl;
+              link.target = '_blank';
+              link.rel = 'noopener noreferrer';
+              
+              // Add to DOM temporarily
+              document.body.appendChild(link);
+              
+              // Force click event
+              link.click();
+              
+              // Clean up
+              document.body.removeChild(link);
+              
+              // Additional fallback for stubborn mobile browsers
+              setTimeout(() => {
+                window.open(googleReviewUrl, '_blank', 'noopener,noreferrer');
+              }, 100);
               
             }, 200);
             return 100;
