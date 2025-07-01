@@ -36,10 +36,11 @@ const ReviewGenerator = () => {
     { emoji: '☹️', label: 'Bad' }
   ];
 
+  // Reordered with Ease of Set Up first, then Improved Ad ROI
   const preferenceOptions = [
-    'Customer Support',
     'Ease of Set Up',
     'Improved Ad ROI',
+    'Customer Support',
     'Precision Targeting',
     'Better Lead Quality',
     'Everything'
@@ -88,18 +89,24 @@ const ReviewGenerator = () => {
         ? reviewData.preferences.join(', ') 
         : reviewData.customText;
 
+      // Create a unique prompt that includes the specific combination of preferences
+      const combinationKey = reviewData.preferences.sort().join('|') + '|' + reviewData.customText;
+      
       const prompt = `You are writing a genuine Google review for TrueAim AI, a cutting-edge ad targeting platform. TrueAim AI provides access to 250+ million consumer profiles with 100+ billion real-time buying signals, helping businesses target Facebook ads to people who are actively looking for their services within the past week.
 
-Write a ${reviewData.emojiLabel.toLowerCase()} review focusing on: ${selectedPreferences}
+Write a ${reviewData.emojiLabel.toLowerCase()} review focusing specifically on: ${selectedPreferences}
 
 The review should:
 - Sound like it's from a real business owner or marketer who actually used the service
-- Include specific, believable results or improvements (use realistic numbers/percentages)
+- Include specific, believable results or improvements for EACH selected area (use realistic numbers/percentages)
 - Mention how it helped with Facebook ad targeting specifically
 - Be conversational and authentic, not overly promotional
 - Include natural language patterns and personal touches
 - Be 2-4 sentences long
 - Avoid generic marketing language
+- Address each selected preference area in a natural way
+
+Selected combination: ${combinationKey}
 
 Examples of good authentic touches:
 - "Finally found a solution that actually works"
@@ -108,7 +115,7 @@ Examples of good authentic touches:
 - "The difference was night and day"
 - "Honestly didn't expect much but..."
 
-Write ONLY the review text, no quotes or formatting.`;
+Write ONLY the review text, no quotes or formatting. Make sure to create a unique review for this specific combination of preferences.`;
 
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -121,7 +128,7 @@ Write ONLY the review text, no quotes or formatting.`;
           messages: [
             {
               role: 'system',
-              content: 'You are an expert at writing authentic, natural-sounding customer reviews that feel genuine and specific.'
+              content: 'You are an expert at writing authentic, natural-sounding customer reviews that feel genuine and specific. Each review should be unique and address the specific combination of preferences mentioned.'
             },
             {
               role: 'user',
@@ -129,7 +136,7 @@ Write ONLY the review text, no quotes or formatting.`;
             }
           ],
           max_tokens: 200,
-          temperature: 0.8,
+          temperature: 0.9, // Increased temperature for more variety
         }),
       });
 
@@ -151,9 +158,11 @@ Write ONLY the review text, no quotes or formatting.`;
 
   const canProceed = reviewData.preferences.length > 0 || reviewData.customText.trim().length > 0;
 
-  // Generate review when preferences change
+  // Generate review whenever preferences or custom text changes
   useEffect(() => {
     if (currentStep === 'preferences' && canProceed) {
+      // Clear previous review immediately to show loading state
+      setGeneratedReview('');
       generateReviewWithChatGPT();
     }
   }, [reviewData.preferences, reviewData.customText, currentStep]);
@@ -176,7 +185,7 @@ Write ONLY the review text, no quotes or formatting.`;
           }
           return prev + 10;
         });
-      }, 400);
+      }, 800); // Doubled the time again (was 400ms, now 800ms)
       
     } catch (error) {
       console.error('Failed to copy text:', error);
