@@ -92,11 +92,21 @@ const ReviewGenerator = () => {
       // Create a unique prompt that includes the specific combination of preferences
       const combinationKey = reviewData.preferences.sort().join('|') + '|' + reviewData.customText;
       
+      // Create specific messaging for Ease of Set Up
+      const easeOfSetUpDetails = reviewData.preferences.includes('Ease of Set Up') 
+        ? `When mentioning "Ease of Set Up", specifically highlight:
+- How smooth and easy the onboarding process was with TrueAim AI
+- How TrueAim AI plugs directly into their existing ad account
+- How simple the setup process was compared to other solutions
+- The seamless integration experience
+
+` : '';
+
       const prompt = `You are writing a genuine Google review for TrueAim AI, a cutting-edge ad targeting platform. TrueAim AI provides access to 250+ million consumer profiles with 100+ billion real-time buying signals, helping businesses target Facebook ads to people who are actively looking for their services within the past week.
 
 Write a ${reviewData.emojiLabel.toLowerCase()} review focusing specifically on: ${selectedPreferences}
 
-The review should:
+${easeOfSetUpDetails}The review should:
 - Sound like it's from a real business owner or marketer who actually used the service
 - Include specific, believable results or improvements for EACH selected area (use realistic numbers/percentages)
 - Mention how it helped with Facebook ad targeting specifically
