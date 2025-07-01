@@ -97,10 +97,17 @@ const ReviewGenerator = () => {
 
 Write a ${reviewData.emojiLabel.toLowerCase()} review focusing specifically on: ${selectedPreferences}
 
-${easeOfSetUpDetails}The review should:
+${easeOfSetUpDetails}IMPORTANT SAFEGUARDS - YOU MUST FOLLOW THESE RULES:
+1. NEVER mention specific metrics, percentages, or numbers (like "32% improvement", "50% increase", etc.)
+2. NEVER mention "ad reach" - TrueAim AI is about TARGETING, not reach
+3. NEVER mention irrelevant metrics like "click-through rates", "impressions", or "reach"
+4. Focus ONLY on what TrueAim AI actually does: better TARGETING of Facebook ads to people actively looking for services
+5. Use qualitative descriptions instead of quantitative claims
+6. Stick to believable, general improvements like "better results", "more qualified leads", "easier setup"
+
+The review should:
 - Sound like it's from a real business owner or marketer who actually used the service
-- Include specific, believable results or improvements for EACH selected area (use realistic numbers/percentages)
-- Mention how it helped with Facebook ad targeting specifically
+- Focus on TARGETING improvements and LEAD QUALITY (not reach or impressions)
 - Be conversational and authentic, not overly promotional
 - Include natural language patterns and personal touches
 - Be 2-4 sentences long
@@ -109,15 +116,23 @@ ${easeOfSetUpDetails}The review should:
 - ABSOLUTELY NEVER use em dashes (—) anywhere in the text
 - Use regular hyphens (-) or commas instead of em dashes
 - Replace any em dash with a comma, period, or regular hyphen
+- Use phrases like "much better targeting", "higher quality leads", "easier to set up", "great support"
 
 Selected combination: ${combinationKey}
 
-Examples of good authentic touches:
-- "Finally found a solution that actually works"
-- "Within the first week I noticed..."
-- "As someone who's tried everything..."
-- "The difference was night and day"
-- "Honestly didn't expect much but..."
+Examples of GOOD authentic language:
+- "Finally found targeting that actually works"
+- "Within the first week I noticed better quality leads"
+- "The targeting is so much more precise"
+- "Setup was incredibly simple"
+- "The leads are much more qualified now"
+
+Examples of BAD language to AVOID:
+- Any specific percentages or numbers
+- "Ad reach improved"
+- "Click-through rates"
+- "Impressions increased"
+- Technical jargon about ad metrics
 
 Write ONLY the review text, no quotes or formatting. Make sure to create a unique review for this specific combination of preferences. NEVER use em dashes (—) in any part of the review.`;
 
@@ -132,7 +147,7 @@ Write ONLY the review text, no quotes or formatting. Make sure to create a uniqu
           messages: [
             {
               role: 'system',
-              content: 'You are an expert at writing authentic, natural-sounding customer reviews that feel genuine and specific. Each review should be unique and address the specific combination of preferences mentioned. NEVER use em dashes (—) in your reviews. Always use regular hyphens (-), commas, or periods instead of em dashes. If you would normally use an em dash, replace it with a comma or split into separate sentences.'
+              content: 'You are an expert at writing authentic, natural-sounding customer reviews for TrueAim AI. You MUST follow these rules: 1) NEVER mention specific metrics, percentages, or numbers, 2) NEVER mention "ad reach" - focus on TARGETING quality, 3) NEVER use em dashes (—), 4) Focus on targeting improvements and lead quality, not reach or impressions, 5) Use qualitative descriptions only. Each review should be unique and address the specific combination of preferences mentioned.'
             },
             {
               role: 'user',
@@ -153,6 +168,10 @@ Write ONLY the review text, no quotes or formatting. Make sure to create a uniqu
       
       // Additional safety check to remove any em dashes that might slip through
       review = review.replace(/—/g, ', ');
+      
+      // Additional safety check to remove any percentage mentions that might slip through
+      review = review.replace(/\b\d+%/g, 'significantly');
+      review = review.replace(/\b\d+\s*percent/gi, 'significantly');
       
       setGeneratedReview(review);
     } catch (error) {
