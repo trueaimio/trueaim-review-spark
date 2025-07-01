@@ -47,7 +47,7 @@ const ReviewGenerator = () => {
 
   const triggerConfetti = () => {
     confetti({
-      particleCount: 100,
+      particleCount: 50,
       spread: 70,
       origin: { y: 0.6 }
     });
@@ -168,7 +168,7 @@ Generate only the review text, no quotes or extra formatting.`;
           }
           return prev + 10;
         });
-      }, 50);
+      }, 100);
       
     } catch (error) {
       console.error('Failed to copy text:', error);
