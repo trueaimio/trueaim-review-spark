@@ -342,31 +342,12 @@ Write ONLY the review text, no quotes or formatting. Make this review completely
           if (prev >= 100) {
             clearInterval(interval);
             setTimeout(() => {
-              // Mobile-optimized redirect for Google Reviews
+              // Simple and reliable redirect that works on both desktop and mobile
               const googleReviewUrl = 'https://g.page/r/CYJQ22pZhgZwEBM/review';
+              console.log('Opening Google Reviews URL:', googleReviewUrl);
               
-              console.log('Attempting to open Google Reviews URL:', googleReviewUrl);
-              
-              // Create a temporary link element and simulate click
-              const link = document.createElement('a');
-              link.href = googleReviewUrl;
-              link.target = '_blank';
-              link.rel = 'noopener noreferrer';
-              
-              // Add to DOM temporarily
-              document.body.appendChild(link);
-              
-              // Force click event
-              link.click();
-              
-              // Clean up
-              document.body.removeChild(link);
-              
-              // Additional fallback for stubborn mobile browsers
-              setTimeout(() => {
-                window.open(googleReviewUrl, '_blank', 'noopener,noreferrer');
-              }, 100);
-              
+              // Use window.open with proper parameters for new tab
+              window.open(googleReviewUrl, '_blank', 'noopener,noreferrer');
             }, 200);
             return 100;
           }
