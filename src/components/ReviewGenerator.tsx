@@ -226,7 +226,7 @@ Generate only the review text, no quotes or extra formatting.`;
                     <h1 className="text-3xl font-bold text-white mb-4">
                       How was your experience with
                     </h1>
-                    <div className="text-4xl font-bold bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent">
+                    <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-purple-700 bg-clip-text text-transparent">
                       TrueAim AI?
                     </div>
                   </div>
