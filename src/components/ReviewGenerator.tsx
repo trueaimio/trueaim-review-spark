@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Copy, ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -337,7 +336,7 @@ Write ONLY the review text, no quotes or formatting. Make this review completely
       setCurrentStep('loading');
       setLoadingProgress(0);
       
-      // Changed increment from 10 to 1 for smoother progress
+      // Changed increment from 10 to 1 for smoother progress, now 30% faster
       const interval = setInterval(() => {
         setLoadingProgress(prev => {
           if (prev >= 100) {
@@ -373,7 +372,7 @@ Write ONLY the review text, no quotes or formatting. Make this review completely
           }
           return prev + 1; // Changed from +10 to +1
         });
-      }, 53.3); // Adjusted timing to maintain same overall speed (5.33 seconds total)
+      }, 37.3); // Reduced from 53.3ms to 37.3ms (30% faster)
       
     } catch (error) {
       console.error('Failed to copy text:', error);
