@@ -162,13 +162,13 @@ Generate only the review text, no quotes or extra formatting.`;
           if (prev >= 100) {
             clearInterval(interval);
             setTimeout(() => {
-              window.open('https://g.page/r/trueaim-ai/review', '_blank');
+              window.open('https://g.page/r/CYJQ22pZhgZwEBM/review', '_blank');
             }, 200);
             return 100;
           }
           return prev + 10;
         });
-      }, 100);
+      }, 200);
       
     } catch (error) {
       console.error('Failed to copy text:', error);
@@ -287,7 +287,7 @@ Generate only the review text, no quotes or extra formatting.`;
                           </p>
                           <Button
                             onClick={handleCopyAndSubmit}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                            className="w-full bg-green-600 hover:bg-green-700 text-white"
                             disabled={isCopied}
                           >
                             {isCopied ? (
