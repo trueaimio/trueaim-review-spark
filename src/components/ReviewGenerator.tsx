@@ -195,7 +195,7 @@ Write ONLY the review text, no quotes or formatting. Make sure to create a uniqu
           }
           return prev + 10;
         });
-      }, 800); // Doubled the time again (was 400ms, now 800ms)
+      }, 533); // Changed from 800ms to 533ms (800 / 1.5 = 533)
       
     } catch (error) {
       console.error('Failed to copy text:', error);
