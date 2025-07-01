@@ -337,18 +337,51 @@ Write ONLY the review text, no quotes or formatting. Make this review completely
       setCurrentStep('loading');
       setLoadingProgress(0);
       
+      // Changed increment from 10 to 1 for smoother progress
       const interval = setInterval(() => {
         setLoadingProgress(prev => {
           if (prev >= 100) {
             clearInterval(interval);
             setTimeout(() => {
-              window.open('https://g.page/r/CYJQ22pZhgZwEBM/review', '_blank');
+              // Mobile-optimized redirect with multiple fallback methods
+              const googleReviewUrl = 'https://g.page/r/CYJQ22pZhgZwEBM/review';
+              
+              // Detect mobile devices
+              const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+              
+              if (isMobile) {
+                // Mobile-specific handling
+                try {
+                  // Method 1: Try direct window.open with specific mobile parameters
+                  const newWindow = window.open(googleReviewUrl, '_blank', 'noopener,noreferrer');
+                  
+                  // Method 2: Fallback if window.open is blocked
+                  if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+                    // Create a temporary link element for mobile
+                    const link = document.createElement('a');
+                    link.href = googleReviewUrl;
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    
+                    // Add to DOM, click, then remove
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }
+                } catch (error) {
+                  // Method 3: Ultimate fallback - direct location change
+                  window.location.href = googleReviewUrl;
+                }
+              } else {
+                // Desktop handling (existing method)
+                window.open(googleReviewUrl, '_blank');
+              }
             }, 200);
             return 100;
           }
-          return prev + 10;
+          return prev + 1; // Changed from +10 to +1
         });
-      }, 533);
+      }, 53.3); // Adjusted timing to maintain same overall speed (5.33 seconds total)
       
     } catch (error) {
       console.error('Failed to copy text:', error);
@@ -366,29 +399,29 @@ Write ONLY the review text, no quotes or formatting. Make this review completely
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl mx-auto">
-        <div className="bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 p-8">
+        <div className="bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 p-4 sm:p-8">
           
           {/* Emoji Selection Step */}
           {currentStep === 'emoji' && (
-            <div className="text-center space-y-8">
+            <div className="text-center space-y-6 sm:space-y-8">
               <div>
-                <h1 className="text-3xl font-bold text-white mb-4">
+                <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4">
                   How was your experience with
                 </h1>
-                <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-purple-700 bg-clip-text text-transparent">
+                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-purple-600 to-purple-700 bg-clip-text text-transparent">
                   TrueAim AI?
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 gap-3 sm:gap-6">
                 {emojis.map(({ emoji, label }) => (
                   <button
                     key={emoji}
                     onClick={() => handleEmojiSelect(emoji, label)}
-                    className="flex flex-col items-center p-8 rounded-xl border-2 border-gray-600 bg-gray-700/30 transition-all duration-300 hover:scale-105 hover:border-blue-500 hover:bg-blue-500/10"
+                    className="flex flex-col items-center p-4 sm:p-8 rounded-xl border-2 border-gray-600 bg-gray-700/30 transition-all duration-300 hover:scale-105 hover:border-blue-500 hover:bg-blue-500/10 active:scale-95 touch-manipulation"
                   >
-                    <div className="text-5xl mb-3">{emoji}</div>
-                    <span className="text-lg font-medium text-gray-300">{label}</span>
+                    <div className="text-3xl sm:text-5xl mb-2 sm:mb-3">{emoji}</div>
+                    <span className="text-sm sm:text-lg font-medium text-gray-300">{label}</span>
                   </button>
                 ))}
               </div>
@@ -398,40 +431,40 @@ Write ONLY the review text, no quotes or formatting. Make this review completely
           {/* Negative Feedback Step */}
           {currentStep === 'negative' && (
             <div className="text-center space-y-6">
-              <div className="text-5xl mb-4">{selectedEmoji}</div>
-              <h2 className="text-2xl font-bold text-white mb-4">
+              <div className="text-4xl sm:text-5xl mb-4">{selectedEmoji}</div>
+              <h2 className="text-xl sm:text-2xl font-bold text-white mb-4">
                 We're sorry you didn't have a good experience
               </h2>
-              <p className="text-gray-300 mb-6">
+              <p className="text-gray-300 mb-6 text-sm sm:text-base">
                 We appreciate your feedback and will work to improve.
               </p>
               
-              <div className="bg-green-900/30 border-2 border-green-600/50 rounded-xl p-6">
+              <div className="bg-green-900/30 border-2 border-green-600/50 rounded-xl p-4 sm:p-6">
                 <div className="flex items-center justify-center gap-2 text-green-400">
-                  <CheckCircle className="h-5 w-5" />
-                  <span className="font-semibold">Feedback Submitted</span>
+                  <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="font-semibold text-sm sm:text-base">Feedback Submitted</span>
                 </div>
-                <p className="text-green-300 mt-2 text-sm">Thank you for taking the time to share your experience with us.</p>
+                <p className="text-green-300 mt-2 text-xs sm:text-sm">Thank you for taking the time to share your experience with us.</p>
               </div>
             </div>
           )}
 
           {/* Preference Selection Step */}
           {currentStep === 'preferences' && (
-            <div className="text-center space-y-6">
+            <div className="text-center space-y-4 sm:space-y-6">
               <div>
-                <div className="text-5xl mb-4">{selectedEmoji}</div>
-                <h2 className="text-2xl font-bold text-white mb-2">Awesome!</h2>
-                <p className="text-gray-300">What impressed you most about TrueAim AI?</p>
+                <div className="text-4xl sm:text-5xl mb-4">{selectedEmoji}</div>
+                <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">Awesome!</h2>
+                <p className="text-gray-300 text-sm sm:text-base">What impressed you most about TrueAim AI?</p>
               </div>
               
-              <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {preferenceOptions.map((option) => (
                     <button
                       key={option}
                       onClick={() => handlePreferenceToggle(option)}
-                      className={`p-4 rounded-lg text-sm font-medium transition-all duration-300 ${
+                      className={`p-3 sm:p-4 rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 touch-manipulation active:scale-95 ${
                         reviewData.preferences.includes(option)
                           ? 'bg-blue-600 text-white border-2 border-blue-400'
                           : 'bg-gray-700 text-gray-300 hover:bg-gray-600 border-2 border-gray-600'
@@ -444,15 +477,15 @@ Write ONLY the review text, no quotes or formatting. Make this review completely
                 
                 {/* Generated review display */}
                 {(generatedReview || isGenerating) && (
-                  <div className="mt-6">
-                    <div className="bg-gray-700/50 rounded-xl p-6 border border-gray-600">
+                  <div className="mt-4 sm:mt-6">
+                    <div className="bg-gray-700/50 rounded-xl p-4 sm:p-6 border border-gray-600">
                       {isGenerating ? (
                         <div className="space-y-4">
                           <div className="text-center">
-                            <p className="text-gray-300 mb-4">Generating your unique review...</p>
+                            <p className="text-gray-300 mb-4 text-sm sm:text-base">Generating your unique review...</p>
                             <div className="max-w-xs mx-auto">
-                              <Progress value={generationProgress} className="h-3 mb-2" />
-                              <p className="text-sm text-blue-400 font-medium">
+                              <Progress value={generationProgress} className="h-2 sm:h-3 mb-2" />
+                              <p className="text-xs sm:text-sm text-blue-400 font-medium">
                                 {Math.round(generationProgress)}% complete
                               </p>
                             </div>
@@ -460,12 +493,12 @@ Write ONLY the review text, no quotes or formatting. Make this review completely
                         </div>
                       ) : (
                         <>
-                          <p className="text-gray-200 leading-relaxed mb-4 text-left">
+                          <p className="text-gray-200 leading-relaxed mb-4 text-left text-sm sm:text-base">
                             "{generatedReview}"
                           </p>
                           <Button
                             onClick={handleCopyAndSubmit}
-                            className="w-full bg-green-600 hover:bg-green-700 text-white"
+                            className="w-full bg-green-600 hover:bg-green-700 text-white text-sm sm:text-base py-3 sm:py-4 touch-manipulation active:scale-95"
                             disabled={isCopied}
                           >
                             {isCopied ? (
@@ -491,22 +524,22 @@ Write ONLY the review text, no quotes or formatting. Make this review completely
 
           {/* Loading Step */}
           {currentStep === 'loading' && (
-            <div className="text-center space-y-6">
+            <div className="text-center space-y-4 sm:space-y-6">
               <div>
-                <h2 className="text-2xl font-bold text-white mb-4">Almost there!</h2>
-                <p className="text-gray-300 mb-8">
+                <h2 className="text-xl sm:text-2xl font-bold text-white mb-4">Almost there!</h2>
+                <p className="text-gray-300 mb-6 sm:mb-8 text-sm sm:text-base px-4">
                   When you get to Google, just paste and you're ready to go!
                 </p>
               </div>
               
-              <div className="max-w-sm mx-auto w-full">
-                <div className="bg-gray-700 rounded-full h-4 mb-4 overflow-hidden">
+              <div className="max-w-sm mx-auto w-full px-4">
+                <div className="bg-gray-700 rounded-full h-3 sm:h-4 mb-4 overflow-hidden">
                   <div 
                     className="bg-gradient-to-r from-green-500 to-emerald-500 h-full rounded-full transition-all duration-100"
                     style={{ width: `${loadingProgress}%` }}
                   ></div>
                 </div>
-                <p className="text-green-400 font-semibold">
+                <p className="text-green-400 font-semibold text-sm sm:text-base">
                   {loadingProgress < 100 ? `Loading... ${Math.round(loadingProgress)}%` : 'Ready! Opening Google Reviews...'}
                 </p>
               </div>
