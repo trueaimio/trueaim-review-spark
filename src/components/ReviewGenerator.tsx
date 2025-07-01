@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Copy, ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -80,15 +79,25 @@ const ReviewGenerator = () => {
     setIsGenerating(true);
     setGenerationProgress(0);
     
-    // Simulate progress during API call
-    const progressInterval = setInterval(() => {
-      setGenerationProgress(prev => {
-        if (prev < 80) {
-          return prev + Math.random() * 15;
-        }
-        return prev;
-      });
-    }, 200);
+    // More realistic progress tracking
+    let progressInterval: NodeJS.Timeout;
+    const startProgress = () => {
+      progressInterval = setInterval(() => {
+        setGenerationProgress(prev => {
+          // Slower initial progress, faster towards the end
+          if (prev < 20) {
+            return prev + Math.random() * 3;
+          } else if (prev < 60) {
+            return prev + Math.random() * 5;
+          } else if (prev < 85) {
+            return prev + Math.random() * 2;
+          }
+          return prev;
+        });
+      }, 300);
+    };
+
+    startProgress();
     
     try {
       const selectedPreferences = reviewData.preferences.join(', ');
@@ -156,6 +165,9 @@ Examples of BAD overly enthusiastic language to AVOID:
 
 Write ONLY the review text, no quotes or formatting. Make sure to create a unique review for this specific combination of preferences. NEVER use em dashes (—) in any part of the review.`;
 
+      // Set progress to 90% when starting the actual API call
+      setGenerationProgress(90);
+
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -179,6 +191,7 @@ Write ONLY the review text, no quotes or formatting. Make sure to create a uniqu
         }),
       });
 
+      // Clear the interval and set to 100% when API call completes
       clearInterval(progressInterval);
       setGenerationProgress(100);
 
@@ -206,9 +219,13 @@ Write ONLY the review text, no quotes or formatting. Make sure to create a uniqu
       console.error('Error generating review:', error);
       alert('Failed to generate review. Please try again.');
       clearInterval(progressInterval);
+      setGenerationProgress(0);
     } finally {
       setIsGenerating(false);
-      setGenerationProgress(0);
+      // Keep the progress at 100% for a moment before resetting
+      setTimeout(() => {
+        setGenerationProgress(0);
+      }, 1000);
     }
   };
 
