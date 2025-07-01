@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Copy, ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -343,39 +342,14 @@ Write ONLY the review text, no quotes or formatting. Make this review completely
           if (prev >= 100) {
             clearInterval(interval);
             setTimeout(() => {
-              // Mobile-optimized redirect with multiple fallback methods
+              // Simplified mobile redirect with better compatibility
               const googleReviewUrl = 'https://g.page/r/CYJQ22pZhgZwEBM/review';
               
-              // Detect mobile devices
-              const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+              console.log('Attempting to open Google Reviews URL:', googleReviewUrl);
               
-              if (isMobile) {
-                // Mobile-specific handling
-                try {
-                  // Method 1: Try direct window.open with specific mobile parameters
-                  const newWindow = window.open(googleReviewUrl, '_blank', 'noopener,noreferrer');
-                  
-                  // Method 2: Fallback if window.open is blocked
-                  if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
-                    // Create a temporary link element for mobile
-                    const link = document.createElement('a');
-                    link.href = googleReviewUrl;
-                    link.target = '_blank';
-                    link.rel = 'noopener noreferrer';
-                    
-                    // Add to DOM, click, then remove
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                  }
-                } catch (error) {
-                  // Method 3: Ultimate fallback - direct location change
-                  window.location.href = googleReviewUrl;
-                }
-              } else {
-                // Desktop handling (existing method)
-                window.open(googleReviewUrl, '_blank');
-              }
+              // Try window.location.href as the most reliable method for mobile
+              window.location.href = googleReviewUrl;
+              
             }, 200);
             return 100;
           }
