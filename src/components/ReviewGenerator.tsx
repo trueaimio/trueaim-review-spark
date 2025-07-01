@@ -45,6 +45,79 @@ const ReviewGenerator = () => {
     'Everything'
   ];
 
+  // Add diverse talking points for each preference
+  const diverseContexts = {
+    'Ease of Set Up': [
+      'quick installation process',
+      'straightforward onboarding',
+      'seamless integration with existing systems',
+      'user-friendly setup wizard',
+      'minimal technical requirements',
+      'plug-and-play functionality'
+    ],
+    'Improved Ad ROI': [
+      'better return on advertising spend',
+      'more efficient budget allocation',
+      'improved cost per acquisition',
+      'better qualified traffic',
+      'higher conversion rates',
+      'reduced wasted ad spend'
+    ],
+    'Customer Support': [
+      'responsive help desk',
+      'knowledgeable support team',
+      'quick resolution times',
+      'helpful documentation',
+      'proactive assistance',
+      'accessible customer service'
+    ],
+    'Precision Targeting': [
+      'accurate audience identification',
+      'detailed demographic filtering',
+      'behavioral targeting capabilities',
+      'lookalike audience creation',
+      'geographic precision',
+      'interest-based targeting'
+    ],
+    'Better Lead Quality': [
+      'higher intent prospects',
+      'more qualified inquiries',
+      'better conversion potential',
+      'relevant customer matches',
+      'reduced bounce rates',
+      'improved lead scoring'
+    ],
+    'Everything': [
+      'comprehensive solution',
+      'all-in-one platform',
+      'complete advertising toolkit',
+      'end-to-end functionality',
+      'holistic approach',
+      'integrated features'
+    ]
+  };
+
+  // Add business types and contexts for more variety
+  const businessContexts = [
+    'small business owner',
+    'marketing manager',
+    'agency professional',
+    'e-commerce store owner',
+    'local business operator',
+    'digital marketer',
+    'startup founder',
+    'sales director'
+  ];
+
+  const timeframes = [
+    'after a few weeks',
+    'within the first month',
+    'after trying it out',
+    'over the past couple months',
+    'since we started using it',
+    'after implementing it'
+  ];
+
   const triggerConfetti = () => {
     confetti({
       particleCount: 25,
@@ -83,18 +156,33 @@ const ReviewGenerator = () => {
     // Simulate progress during API call
     const progressInterval = setInterval(() => {
       setGenerationProgress(prev => {
-        if (prev < 80) {
-          return prev + Math.random() * 15;
+        if (prev < 90) {
+          return prev + Math.random() * 10;
         }
         return prev;
       });
-    }, 200);
+    }, 150);
     
     try {
       const selectedPreferences = reviewData.preferences.join(', ');
+      
+      // Generate random contexts for variety
+      const randomBusinessContext = businessContexts[Math.floor(Math.random() * businessContexts.length)];
+      const randomTimeframe = timeframes[Math.floor(Math.random() * timeframes.length)];
+      
+      // Get diverse talking points for selected preferences
+      const diversePoints = reviewData.preferences.flatMap(pref => {
+        const contexts = diverseContexts[pref] || [];
+        // Pick 1-2 random contexts for each preference
+        const shuffled = [...contexts].sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, Math.floor(Math.random() * 2) + 1);
+      });
+      
+      const randomPoints = diversePoints.slice(0, 3); // Limit to 3 points max
 
       // Create a unique prompt that includes the specific combination of preferences
       const combinationKey = reviewData.preferences.sort().join('|');
+      const uniqueId = Math.random().toString(36).substring(7);
       
       // Create specific messaging for Ease of Set Up
       const easeOfSetUpDetails = reviewData.preferences.includes('Ease of Set Up') 
@@ -108,9 +196,19 @@ const ReviewGenerator = () => {
 
       const prompt = `You are writing a genuine Google review for TrueAim AI, a cutting-edge ad targeting platform. TrueAim AI provides access to 250+ million consumer profiles with 100+ billion real-time buying signals, helping businesses target Facebook ads to people who are actively looking for their services within the past week.
 
-Write a ${reviewData.emojiLabel.toLowerCase()} review focusing specifically on: ${selectedPreferences}
+Write a ${reviewData.emojiLabel.toLowerCase()} review from the perspective of a ${randomBusinessContext} focusing specifically on: ${selectedPreferences}
 
-${easeOfSetUpDetails}IMPORTANT SAFEGUARDS - YOU MUST FOLLOW THESE RULES:
+Context for variety: You're writing this review ${randomTimeframe}. Consider incorporating these specific aspects naturally: ${randomPoints.join(', ')}.
+
+${easeOfSetUpDetails}CRITICAL DIVERSITY REQUIREMENTS:
+1. Use a unique writing style - vary sentence structure, length, and tone
+2. Choose different aspects to emphasize even within the same preference categories
+3. Use varied vocabulary and phrasing
+4. Include personal touches that make this review unique
+5. Vary the review structure (don't always start the same way)
+6. Use different transitional phrases and connectors
+
+SAFEGUARDS - YOU MUST FOLLOW THESE RULES:
 1. NEVER mention specific metrics, percentages, or numbers (like "32% improvement", "50% increase", etc.)
 2. NEVER mention "ad reach" - TrueAim AI is about TARGETING, not reach
 3. NEVER mention irrelevant metrics like "click-through rates", "impressions", or "reach"
@@ -119,22 +217,32 @@ ${easeOfSetUpDetails}IMPORTANT SAFEGUARDS - YOU MUST FOLLOW THESE RULES:
 6. Stick to believable, general improvements like "better results", "more qualified leads", "easier setup"
 7. Keep tone moderate and professional - avoid overly enthusiastic language like "one of the best", "amazing", "incredible"
 8. Use balanced language - instead of superlatives, use words like "good", "solid", "helpful", "works well"
+9. ABSOLUTELY NEVER use em dashes (—) anywhere in the text
+10. Use regular hyphens (-) or commas instead of em dashes
+11. Replace any em dash with a comma, period, or regular hyphen
+12. Use measured, realistic language that sounds credible
+13. Avoid extreme superlatives or overly giddy expressions
+
+STYLE VARIATION INSTRUCTIONS:
+- Mix short and long sentences
+- Vary how you start the review (don't always lead with the same structure)
+- Use different ways to express satisfaction
+- Incorporate varied business terminology naturally
+- Change up the flow and rhythm of the writing
+- Use different connector words (however, additionally, furthermore, also, plus, etc.)
 
 The review should:
-- Sound like it's from a real business owner or marketer who actually used the service
+- Sound like it's from a real ${randomBusinessContext} who actually used the service
 - Focus on TARGETING improvements and LEAD QUALITY (not reach or impressions)
 - Be conversational and authentic, not overly promotional
-- Include natural language patterns and personal touches
+- Include natural language patterns and personal touches unique to this review
 - Be 2-4 sentences long
 - Avoid generic marketing language
 - Address each selected preference area in a natural way
-- ABSOLUTELY NEVER use em dashes (—) anywhere in the text
-- Use regular hyphens (-) or commas instead of em dashes
-- Replace any em dash with a comma, period, or regular hyphen
-- Use measured, realistic language that sounds credible
-- Avoid extreme superlatives or overly giddy expressions
+- Create a completely unique voice and perspective
 
 Selected combination: ${combinationKey}
+Unique identifier: ${uniqueId}
 
 Examples of GOOD balanced language:
 - "The targeting works well for our needs"
@@ -154,7 +262,7 @@ Examples of BAD overly enthusiastic language to AVOID:
 - "Click-through rates"
 - "Impressions increased"
 
-Write ONLY the review text, no quotes or formatting. Make sure to create a unique review for this specific combination of preferences. NEVER use em dashes (—) in any part of the review.`;
+Write ONLY the review text, no quotes or formatting. Make this review completely unique and different from any other review that might be generated. NEVER use em dashes (—) in any part of the review.`;
 
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -167,7 +275,7 @@ Write ONLY the review text, no quotes or formatting. Make sure to create a uniqu
           messages: [
             {
               role: 'system',
-              content: 'You are an expert at writing authentic, natural-sounding customer reviews for TrueAim AI. You MUST follow these rules: 1) NEVER mention specific metrics, percentages, or numbers, 2) NEVER mention "ad reach" - focus on TARGETING quality, 3) NEVER use em dashes (—), 4) Focus on targeting improvements and lead quality, not reach or impressions, 5) Use qualitative descriptions only, 6) Keep tone moderate and professional - avoid overly enthusiastic superlatives, 7) Use balanced, credible language that sounds realistic. Each review should be unique and address the specific combination of preferences mentioned.'
+              content: 'You are an expert at writing authentic, unique, and varied customer reviews for TrueAim AI. Your primary goal is to create completely different reviews each time while following all safety guidelines. You MUST: 1) Create unique writing styles and structures, 2) Vary vocabulary and phrasing significantly, 3) NEVER mention specific metrics or percentages, 4) NEVER mention "ad reach" - focus on TARGETING quality, 5) NEVER use em dashes (—), 6) Focus on targeting improvements and lead quality, 7) Use qualitative descriptions only, 8) Keep tone moderate and professional, 9) Use balanced, credible language, 10) Make each review completely distinct in voice, style, and emphasis.'
             },
             {
               role: 'user',
@@ -175,7 +283,10 @@ Write ONLY the review text, no quotes or formatting. Make sure to create a uniqu
             }
           ],
           max_tokens: 200,
-          temperature: 0.9, // Increased temperature for more variety
+          temperature: 1.1, // Increased temperature for maximum variety
+          top_p: 0.95, // Higher top_p for more diverse token selection
+          frequency_penalty: 0.8, // Higher frequency penalty to reduce repetition
+          presence_penalty: 0.6, // Presence penalty to encourage new topics
         }),
       });
 
@@ -189,14 +300,10 @@ Write ONLY the review text, no quotes or formatting. Make sure to create a uniqu
       const data = await response.json();
       let review = data.choices[0]?.message?.content?.trim() || '';
       
-      // Additional safety check to remove any em dashes that might slip through
+      // Additional safety checks
       review = review.replace(/—/g, ', ');
-      
-      // Additional safety check to remove any percentage mentions that might slip through
       review = review.replace(/\b\d+%/g, 'significantly');
       review = review.replace(/\b\d+\s*percent/gi, 'significantly');
-      
-      // Additional safety check to tone down overly enthusiastic language
       review = review.replace(/one of the (best|easiest|most \w+)/gi, 'a good');
       review = review.replace(/absolutely (amazing|incredible|fantastic)/gi, 'helpful');
       review = review.replace(/game-changer/gi, 'useful tool');
@@ -241,7 +348,7 @@ Write ONLY the review text, no quotes or formatting. Make sure to create a uniqu
           }
           return prev + 10;
         });
-      }, 533); // Changed from 800ms to 533ms (800 / 1.5 = 533)
+      }, 533);
       
     } catch (error) {
       console.error('Failed to copy text:', error);
