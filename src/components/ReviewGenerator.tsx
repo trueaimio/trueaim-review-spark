@@ -104,6 +104,8 @@ ${easeOfSetUpDetails}IMPORTANT SAFEGUARDS - YOU MUST FOLLOW THESE RULES:
 4. Focus ONLY on what TrueAim AI actually does: better TARGETING of Facebook ads to people actively looking for services
 5. Use qualitative descriptions instead of quantitative claims
 6. Stick to believable, general improvements like "better results", "more qualified leads", "easier setup"
+7. Keep tone moderate and professional - avoid overly enthusiastic language like "one of the best", "amazing", "incredible"
+8. Use balanced language - instead of superlatives, use words like "good", "solid", "helpful", "works well"
 
 The review should:
 - Sound like it's from a real business owner or marketer who actually used the service
@@ -116,23 +118,28 @@ The review should:
 - ABSOLUTELY NEVER use em dashes (—) anywhere in the text
 - Use regular hyphens (-) or commas instead of em dashes
 - Replace any em dash with a comma, period, or regular hyphen
-- Use phrases like "much better targeting", "higher quality leads", "easier to set up", "great support"
+- Use measured, realistic language that sounds credible
+- Avoid extreme superlatives or overly giddy expressions
 
 Selected combination: ${combinationKey}
 
-Examples of GOOD authentic language:
-- "Finally found targeting that actually works"
-- "Within the first week I noticed better quality leads"
-- "The targeting is so much more precise"
-- "Setup was incredibly simple"
-- "The leads are much more qualified now"
+Examples of GOOD balanced language:
+- "The targeting works well for our needs"
+- "Setup was straightforward and took about 10 minutes"
+- "We're getting better quality leads now"
+- "The targeting is more precise than what we had before"
+- "Support was helpful when we had questions"
 
-Examples of BAD language to AVOID:
+Examples of BAD overly enthusiastic language to AVOID:
+- "One of the best/easiest/most amazing"
+- "Absolutely incredible"
+- "Mind-blowing results"
+- "Game-changer"
+- "Revolutionary"
 - Any specific percentages or numbers
 - "Ad reach improved"
 - "Click-through rates"
 - "Impressions increased"
-- Technical jargon about ad metrics
 
 Write ONLY the review text, no quotes or formatting. Make sure to create a unique review for this specific combination of preferences. NEVER use em dashes (—) in any part of the review.`;
 
@@ -147,7 +154,7 @@ Write ONLY the review text, no quotes or formatting. Make sure to create a uniqu
           messages: [
             {
               role: 'system',
-              content: 'You are an expert at writing authentic, natural-sounding customer reviews for TrueAim AI. You MUST follow these rules: 1) NEVER mention specific metrics, percentages, or numbers, 2) NEVER mention "ad reach" - focus on TARGETING quality, 3) NEVER use em dashes (—), 4) Focus on targeting improvements and lead quality, not reach or impressions, 5) Use qualitative descriptions only. Each review should be unique and address the specific combination of preferences mentioned.'
+              content: 'You are an expert at writing authentic, natural-sounding customer reviews for TrueAim AI. You MUST follow these rules: 1) NEVER mention specific metrics, percentages, or numbers, 2) NEVER mention "ad reach" - focus on TARGETING quality, 3) NEVER use em dashes (—), 4) Focus on targeting improvements and lead quality, not reach or impressions, 5) Use qualitative descriptions only, 6) Keep tone moderate and professional - avoid overly enthusiastic superlatives, 7) Use balanced, credible language that sounds realistic. Each review should be unique and address the specific combination of preferences mentioned.'
             },
             {
               role: 'user',
@@ -172,6 +179,11 @@ Write ONLY the review text, no quotes or formatting. Make sure to create a uniqu
       // Additional safety check to remove any percentage mentions that might slip through
       review = review.replace(/\b\d+%/g, 'significantly');
       review = review.replace(/\b\d+\s*percent/gi, 'significantly');
+      
+      // Additional safety check to tone down overly enthusiastic language
+      review = review.replace(/one of the (best|easiest|most \w+)/gi, 'a good');
+      review = review.replace(/absolutely (amazing|incredible|fantastic)/gi, 'helpful');
+      review = review.replace(/game-changer/gi, 'useful tool');
       
       setGeneratedReview(review);
     } catch (error) {
