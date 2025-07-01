@@ -115,6 +115,7 @@ ${easeOfSetUpDetails}The review should:
 - Be 2-4 sentences long
 - Avoid generic marketing language
 - Address each selected preference area in a natural way
+- Do NOT use em dashes (—) in the review text
 
 Selected combination: ${combinationKey}
 
@@ -138,7 +139,7 @@ Write ONLY the review text, no quotes or formatting. Make sure to create a uniqu
           messages: [
             {
               role: 'system',
-              content: 'You are an expert at writing authentic, natural-sounding customer reviews that feel genuine and specific. Each review should be unique and address the specific combination of preferences mentioned.'
+              content: 'You are an expert at writing authentic, natural-sounding customer reviews that feel genuine and specific. Each review should be unique and address the specific combination of preferences mentioned. Never use em dashes (—) in your reviews.'
             },
             {
               role: 'user',
