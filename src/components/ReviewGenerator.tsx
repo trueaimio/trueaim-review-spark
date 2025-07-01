@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Copy, ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -24,8 +25,9 @@ const ReviewGenerator = () => {
   const [isCopied, setIsCopied] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [apiKey, setApiKey] = useState('');
-  const [showApiInput, setShowApiInput] = useState(true);
+  
+  // Use the provided API key directly
+  const apiKey = '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';
 
   const emojis = [
     { emoji: '😃', label: 'Excellent' },
@@ -79,11 +81,6 @@ const ReviewGenerator = () => {
   };
 
   const generateReviewWithChatGPT = async () => {
-    if (!apiKey.trim()) {
-      alert('Please enter your OpenAI API key first');
-      return;
-    }
-
     setIsGenerating(true);
     
     try {
@@ -138,7 +135,7 @@ Generate only the review text, no quotes or extra formatting.`;
       setGeneratedReview(review);
     } catch (error) {
       console.error('Error generating review:', error);
-      alert('Failed to generate review. Please check your API key and try again.');
+      alert('Failed to generate review. Please try again.');
     } finally {
       setIsGenerating(false);
     }
@@ -146,12 +143,12 @@ Generate only the review text, no quotes or extra formatting.`;
 
   const canProceed = reviewData.preferences.length > 0 || reviewData.customText.trim().length > 0;
 
-  // Generate review when preferences change and API key is available
+  // Generate review when preferences change
   useEffect(() => {
-    if (currentStep === 'preferences' && canProceed && apiKey.trim()) {
+    if (currentStep === 'preferences' && canProceed) {
       generateReviewWithChatGPT();
     }
-  }, [reviewData.preferences, reviewData.customText, currentStep, apiKey]);
+  }, [reviewData.preferences, reviewData.customText, currentStep]);
 
   const handleCopyAndSubmit = async () => {
     try {
@@ -191,181 +188,151 @@ Generate only the review text, no quotes or extra formatting.`;
       <div className="w-full max-w-2xl mx-auto">
         <div className="bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 p-8">
           
-          {/* API Key Input */}
-          {showApiInput && (
-            <div className="mb-8 p-6 bg-gray-700/50 rounded-xl border border-gray-600">
-              <h3 className="text-lg font-semibold text-white mb-4">OpenAI API Key Required</h3>
-              <p className="text-gray-300 text-sm mb-4">
-                Enter your OpenAI API key to generate unique reviews with ChatGPT
-              </p>
-              <div className="flex gap-3">
-                <Input
-                  type="password"
-                  placeholder="sk-..."
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  className="bg-gray-600 border-gray-500 text-white placeholder-gray-400"
-                />
-                <Button
-                  onClick={() => setShowApiInput(false)}
-                  disabled={!apiKey.trim()}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  Continue
-                </Button>
+          {/* Emoji Selection Step */}
+          {currentStep === 'emoji' && (
+            <div className="text-center space-y-8">
+              <div>
+                <h1 className="text-3xl font-bold text-white mb-4">
+                  How was your experience with
+                </h1>
+                <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-purple-700 bg-clip-text text-transparent">
+                  TrueAim AI?
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-6">
+                {emojis.map(({ emoji, label }) => (
+                  <button
+                    key={emoji}
+                    onClick={() => handleEmojiSelect(emoji, label)}
+                    className="flex flex-col items-center p-8 rounded-xl border-2 border-gray-600 bg-gray-700/30 transition-all duration-300 hover:scale-105 hover:border-blue-500 hover:bg-blue-500/10"
+                  >
+                    <div className="text-5xl mb-3">{emoji}</div>
+                    <span className="text-lg font-medium text-gray-300">{label}</span>
+                  </button>
+                ))}
               </div>
             </div>
           )}
 
-          {!showApiInput && (
-            <>
-              {/* Emoji Selection Step */}
-              {currentStep === 'emoji' && (
-                <div className="text-center space-y-8">
-                  <div>
-                    <h1 className="text-3xl font-bold text-white mb-4">
-                      How was your experience with
-                    </h1>
-                    <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-purple-700 bg-clip-text text-transparent">
-                      TrueAim AI?
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-6">
-                    {emojis.map(({ emoji, label }) => (
-                      <button
-                        key={emoji}
-                        onClick={() => handleEmojiSelect(emoji, label)}
-                        className="flex flex-col items-center p-8 rounded-xl border-2 border-gray-600 bg-gray-700/30 transition-all duration-300 hover:scale-105 hover:border-blue-500 hover:bg-blue-500/10"
-                      >
-                        <div className="text-5xl mb-3">{emoji}</div>
-                        <span className="text-lg font-medium text-gray-300">{label}</span>
-                      </button>
-                    ))}
-                  </div>
+          {/* Negative Feedback Step */}
+          {currentStep === 'negative' && (
+            <div className="text-center space-y-6">
+              <div className="text-5xl mb-4">{selectedEmoji}</div>
+              <h2 className="text-2xl font-bold text-white mb-4">
+                We're sorry you didn't have a good experience
+              </h2>
+              <p className="text-gray-300 mb-6">
+                We appreciate your feedback and will work to improve.
+              </p>
+              
+              <div className="bg-green-900/30 border-2 border-green-600/50 rounded-xl p-6">
+                <div className="flex items-center justify-center gap-2 text-green-400">
+                  <CheckCircle className="h-5 w-5" />
+                  <span className="font-semibold">Feedback Submitted</span>
                 </div>
-              )}
+                <p className="text-green-300 mt-2 text-sm">Thank you for taking the time to share your experience with us.</p>
+              </div>
+            </div>
+          )}
 
-              {/* Negative Feedback Step */}
-              {currentStep === 'negative' && (
-                <div className="text-center space-y-6">
-                  <div className="text-5xl mb-4">{selectedEmoji}</div>
-                  <h2 className="text-2xl font-bold text-white mb-4">
-                    We're sorry you didn't have a good experience
-                  </h2>
-                  <p className="text-gray-300 mb-6">
-                    We appreciate your feedback and will work to improve.
-                  </p>
-                  
-                  <div className="bg-green-900/30 border-2 border-green-600/50 rounded-xl p-6">
-                    <div className="flex items-center justify-center gap-2 text-green-400">
-                      <CheckCircle className="h-5 w-5" />
-                      <span className="font-semibold">Feedback Submitted</span>
-                    </div>
-                    <p className="text-green-300 mt-2 text-sm">Thank you for taking the time to share your experience with us.</p>
-                  </div>
+          {/* Preference Selection Step */}
+          {currentStep === 'preferences' && (
+            <div className="text-center space-y-6">
+              <div>
+                <div className="text-5xl mb-4">{selectedEmoji}</div>
+                <h2 className="text-2xl font-bold text-white mb-2">Awesome!</h2>
+                <p className="text-gray-300">What impressed you most about TrueAim AI?</p>
+              </div>
+              
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-3">
+                  {preferenceOptions.map((option) => (
+                    <button
+                      key={option}
+                      onClick={() => handlePreferenceToggle(option)}
+                      className={`p-4 rounded-lg text-sm font-medium transition-all duration-300 ${
+                        reviewData.preferences.includes(option)
+                          ? 'bg-blue-600 text-white border-2 border-blue-400'
+                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600 border-2 border-gray-600'
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  ))}
                 </div>
-              )}
-
-              {/* Preference Selection Step */}
-              {currentStep === 'preferences' && (
-                <div className="text-center space-y-6">
-                  <div>
-                    <div className="text-5xl mb-4">{selectedEmoji}</div>
-                    <h2 className="text-2xl font-bold text-white mb-2">Awesome!</h2>
-                    <p className="text-gray-300">What impressed you most about TrueAim AI?</p>
-                  </div>
-                  
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-2 gap-3">
-                      {preferenceOptions.map((option) => (
-                        <button
-                          key={option}
-                          onClick={() => handlePreferenceToggle(option)}
-                          className={`p-4 rounded-lg text-sm font-medium transition-all duration-300 ${
-                            reviewData.preferences.includes(option)
-                              ? 'bg-blue-600 text-white border-2 border-blue-400'
-                              : 'bg-gray-700 text-gray-300 hover:bg-gray-600 border-2 border-gray-600'
-                          }`}
-                        >
-                          {option}
-                        </button>
-                      ))}
-                    </div>
-                    
-                    <div>
-                      <Input
-                        placeholder="Or describe your own experience..."
-                        value={reviewData.customText}
-                        onChange={(e) => handleCustomTextChange(e.target.value)}
-                        className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                      />
-                    </div>
-                    
-                    {/* Generated review display */}
-                    {(generatedReview || isGenerating) && (
-                      <div className="mt-6">
-                        <div className="bg-gray-700/50 rounded-xl p-6 border border-gray-600">
-                          {isGenerating ? (
-                            <div className="text-center">
-                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-3"></div>
-                              <p className="text-gray-300">Generating your unique review...</p>
-                            </div>
-                          ) : (
-                            <>
-                              <p className="text-gray-200 leading-relaxed mb-4 text-left">
-                                "{generatedReview}"
-                              </p>
-                              <Button
-                                onClick={handleCopyAndSubmit}
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                                disabled={isCopied}
-                              >
-                                {isCopied ? (
-                                  <>
-                                    <CheckCircle className="mr-2 h-4 w-4" />
-                                    Copied! Redirecting...
-                                  </>
-                                ) : (
-                                  <>
-                                    <Copy className="mr-2 h-4 w-4" />
-                                    Copy & Submit Review
-                                  </>
-                                )}
-                              </Button>
-                            </>
-                          )}
+                
+                <div>
+                  <Input
+                    placeholder="Or describe your own experience..."
+                    value={reviewData.customText}
+                    onChange={(e) => handleCustomTextChange(e.target.value)}
+                    className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                  />
+                </div>
+                
+                {/* Generated review display */}
+                {(generatedReview || isGenerating) && (
+                  <div className="mt-6">
+                    <div className="bg-gray-700/50 rounded-xl p-6 border border-gray-600">
+                      {isGenerating ? (
+                        <div className="text-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-3"></div>
+                          <p className="text-gray-300">Generating your unique review...</p>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Loading Step */}
-              {currentStep === 'loading' && (
-                <div className="text-center space-y-6">
-                  <div>
-                    <h2 className="text-2xl font-bold text-white mb-4">Almost there!</h2>
-                    <p className="text-gray-300 mb-8">
-                      When you get to Google, just paste and you're ready to go!
-                    </p>
-                  </div>
-                  
-                  <div className="max-w-sm mx-auto w-full">
-                    <div className="bg-gray-700 rounded-full h-4 mb-4 overflow-hidden">
-                      <div 
-                        className="bg-gradient-to-r from-green-500 to-emerald-500 h-full rounded-full transition-all duration-100"
-                        style={{ width: `${loadingProgress}%` }}
-                      ></div>
+                      ) : (
+                        <>
+                          <p className="text-gray-200 leading-relaxed mb-4 text-left">
+                            "{generatedReview}"
+                          </p>
+                          <Button
+                            onClick={handleCopyAndSubmit}
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                            disabled={isCopied}
+                          >
+                            {isCopied ? (
+                              <>
+                                <CheckCircle className="mr-2 h-4 w-4" />
+                                Copied! Redirecting...
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="mr-2 h-4 w-4" />
+                                Copy & Submit Review
+                              </>
+                            )}
+                          </Button>
+                        </>
+                      )}
                     </div>
-                    <p className="text-green-400 font-semibold">
-                      {loadingProgress < 100 ? `Loading... ${Math.round(loadingProgress)}%` : 'Ready! Opening Google Reviews...'}
-                    </p>
                   </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Loading Step */}
+          {currentStep === 'loading' && (
+            <div className="text-center space-y-6">
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-4">Almost there!</h2>
+                <p className="text-gray-300 mb-8">
+                  When you get to Google, just paste and you're ready to go!
+                </p>
+              </div>
+              
+              <div className="max-w-sm mx-auto w-full">
+                <div className="bg-gray-700 rounded-full h-4 mb-4 overflow-hidden">
+                  <div 
+                    className="bg-gradient-to-r from-green-500 to-emerald-500 h-full rounded-full transition-all duration-100"
+                    style={{ width: `${loadingProgress}%` }}
+                  ></div>
                 </div>
-              )}
-            </>
+                <p className="text-green-400 font-semibold">
+                  {loadingProgress < 100 ? `Loading... ${Math.round(loadingProgress)}%` : 'Ready! Opening Google Reviews...'}
+                </p>
+              </div>
+            </div>
           )}
         </div>
       </div>
