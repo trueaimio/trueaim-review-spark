@@ -384,10 +384,10 @@ Write ONLY the review text, no quotes or formatting. Make this review completely
           {currentStep === 'emoji' && (
             <div className="text-center space-y-6 sm:space-y-8">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+                <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
                   How was your experience with
                 </h1>
-                <div className="flex justify-center mb-4">
+                <div className="flex justify-center">
                   <img 
                     src="/lovable-uploads/8de08320-699b-4cbb-bda0-f9a053e5694a.png" 
                     alt="TrueAim AI"
