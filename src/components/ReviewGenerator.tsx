@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Copy, ArrowRight, CheckCircle, Key } from 'lucide-react';
+import { Copy, ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import confetti from 'canvas-confetti';
@@ -11,7 +11,6 @@ interface ReviewData {
 }
 
 const ReviewGenerator = () => {
-  const [apiKey, setApiKey] = useState('');
   const [selectedEmoji, setSelectedEmoji] = useState<string>('');
   const [reviewData, setReviewData] = useState<ReviewData>({
     emoji: '',
@@ -19,11 +18,14 @@ const ReviewGenerator = () => {
     preferences: []
   });
   const [generatedReview, setGeneratedReview] = useState('');
-  const [currentStep, setCurrentStep] = useState<'apikey' | 'emoji' | 'preferences' | 'review' | 'negative' | 'loading'>('apikey');
+  const [currentStep, setCurrentStep] = useState<'emoji' | 'preferences' | 'review' | 'negative' | 'loading'>('emoji');
   const [isCopied, setIsCopied] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationProgress, setGenerationProgress] = useState(0);
+
+  // Hardcoded API key
+  const apiKey = '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';
 
   const emojis = [
     { emoji: '😃', label: 'Excellent' },
@@ -121,12 +123,6 @@ const ReviewGenerator = () => {
       spread: 70,
       origin: { y: 0.6 }
     });
-  };
-
-  const handleApiKeySubmit = () => {
-    if (apiKey.trim()) {
-      setCurrentStep('emoji');
-    }
   };
 
   const handleEmojiSelect = (emoji: string, label: string) => {
@@ -384,41 +380,6 @@ Write ONLY the review text, no quotes or formatting. Make this review completely
       <div className="w-full max-w-2xl mx-auto">
         <div className="bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 p-4 sm:p-8">
           
-          {/* API Key Input Step */}
-          {currentStep === 'apikey' && (
-            <div className="text-center space-y-6">
-              <div>
-                <Key className="h-12 w-12 sm:h-16 sm:w-16 text-blue-400 mx-auto mb-4" />
-                <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
-                  Enter OpenAI API Key
-                </h1>
-                <p className="text-gray-300 text-sm sm:text-base mb-6">
-                  You need a valid OpenAI API key to generate reviews. Get yours at{' '}
-                  <a href="https://platform.openai.com/account/api-keys" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline">
-                    platform.openai.com
-                  </a>
-                </p>
-              </div>
-              
-              <div className="space-y-4">
-                <input
-                  type="password"
-                  placeholder="sk-proj-..."
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  className="w-full p-4 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
-                />
-                <Button
-                  onClick={handleApiKeySubmit}
-                  disabled={!apiKey.trim()}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Continue
-                </Button>
-              </div>
-            </div>
-          )}
-
           {/* Emoji Selection Step */}
           {currentStep === 'emoji' && (
             <div className="text-center">
