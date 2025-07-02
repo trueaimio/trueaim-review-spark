@@ -387,8 +387,12 @@ Write ONLY the review text, no quotes or formatting. Make this review completely
                 <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4">
                   How was your experience with
                 </h1>
-                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-purple-800 to-purple-900 bg-clip-text text-transparent">
-                  TrueAim AI?
+                <div className="flex justify-center mb-4">
+                  <img 
+                    src="/lovable-uploads/8de08320-699b-4cbb-bda0-f9a053e5694a.png" 
+                    alt="TrueAim AI"
+                    className="h-12 sm:h-16 w-auto"
+                  />
                 </div>
               </div>
               
