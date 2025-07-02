@@ -391,7 +391,7 @@ Write ONLY the review text, no quotes or formatting. Make this review completely
                   <img 
                     src="/lovable-uploads/8de08320-699b-4cbb-bda0-f9a053e5694a.png" 
                     alt="TrueAim AI"
-                    className="h-12 sm:h-16 w-auto"
+                    className="h-24 sm:h-32 w-auto"
                   />
                 </div>
               </div>
