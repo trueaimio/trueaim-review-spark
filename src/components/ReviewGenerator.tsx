@@ -25,7 +25,7 @@ const ReviewGenerator = () => {
   const [generationProgress, setGenerationProgress] = useState(0);
 
   // Hardcoded API key
-  const apiKey = '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';
+  const apiKey = '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';
 
   const emojis = [
     { emoji: '😃', label: 'Excellent' },
