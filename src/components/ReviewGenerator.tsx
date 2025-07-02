@@ -383,7 +383,7 @@ Write ONLY the review text, no quotes or formatting. Make this review completely
           {/* Emoji Selection Step */}
           {currentStep === 'emoji' && (
             <div className="text-center">
-              <h1 className="text-2xl sm:text-3xl font-bold text-white relative z-10 -mb-12">
+              <h1 className="text-2xl sm:text-3xl font-bold text-white relative z-10 -mb-6">
                 How was your experience with
               </h1>
               <div className="flex justify-center relative">
@@ -394,7 +394,7 @@ Write ONLY the review text, no quotes or formatting. Make this review completely
                 />
               </div>
               
-              <div className="grid grid-cols-2 gap-3 sm:gap-6 -mt-12 relative z-10">
+              <div className="grid grid-cols-2 gap-3 sm:gap-6 -mt-6 relative z-10">
                 {emojis.map(({ emoji, label }) => (
                   <button
                     key={emoji}
