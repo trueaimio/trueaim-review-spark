@@ -382,9 +382,9 @@ Write ONLY the review text, no quotes or formatting. Make this review completely
           
           {/* Emoji Selection Step */}
           {currentStep === 'emoji' && (
-            <div className="text-center space-y-6 sm:space-y-8">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+            <div className="text-center space-y-4 sm:space-y-6">
+              <div className="space-y-2">
+                <h1 className="text-2xl sm:text-3xl font-bold text-white">
                   How was your experience with
                 </h1>
                 <div className="flex justify-center">
