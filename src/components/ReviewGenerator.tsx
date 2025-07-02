@@ -383,11 +383,11 @@ Write ONLY the review text, no quotes or formatting. Make this review completely
           {/* Emoji Selection Step */}
           {currentStep === 'emoji' && (
             <div className="text-center space-y-4 sm:space-y-6">
-              <div className="space-y-2">
-                <h1 className="text-2xl sm:text-3xl font-bold text-white">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
                   How was your experience with
                 </h1>
-                <div className="flex justify-center">
+                <div className="flex justify-center mb-2">
                   <img 
                     src="/lovable-uploads/8de08320-699b-4cbb-bda0-f9a053e5694a.png" 
                     alt="TrueAim AI"
@@ -425,7 +425,7 @@ Write ONLY the review text, no quotes or formatting. Make this review completely
               <div className="bg-green-900/30 border-2 border-green-600/50 rounded-xl p-4 sm:p-6">
                 <div className="flex items-center justify-center gap-2 text-green-400">
                   <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5" />
-                  <span className="font-semibold text-sm sm:text-base">Feedback Submitted</span>
+                  <span className="font-semibold text-sm:text-base">Feedback Submitted</span>
                 </div>
                 <p className="text-green-300 mt-2 text-xs sm:text-sm">Thank you for taking the time to share your experience with us.</p>
               </div>
