@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Copy, ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -383,21 +382,19 @@ Write ONLY the review text, no quotes or formatting. Make this review completely
           
           {/* Emoji Selection Step */}
           {currentStep === 'emoji' && (
-            <div className="text-center space-y-4 sm:space-y-6">
-              <div className="space-y-0">
-                <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4 relative z-10">
-                  How was your experience with
-                </h1>
-                <div className="flex justify-center -my-8">
-                  <img 
-                    src="/lovable-uploads/8de08320-699b-4cbb-bda0-f9a053e5694a.png" 
-                    alt="TrueAim AI"
-                    className="h-24 sm:h-32 w-auto"
-                  />
-                </div>
+            <div className="text-center">
+              <h1 className="text-2xl sm:text-3xl font-bold text-white relative z-10 -mb-12">
+                How was your experience with
+              </h1>
+              <div className="flex justify-center relative">
+                <img 
+                  src="/lovable-uploads/8de08320-699b-4cbb-bda0-f9a053e5694a.png" 
+                  alt="TrueAim AI"
+                  className="h-24 sm:h-32 w-auto"
+                />
               </div>
               
-              <div className="grid grid-cols-2 gap-3 sm:gap-6 -mt-4 relative z-10">
+              <div className="grid grid-cols-2 gap-3 sm:gap-6 -mt-12 relative z-10">
                 {emojis.map(({ emoji, label }) => (
                   <button
                     key={emoji}
