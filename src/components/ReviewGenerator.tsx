@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Copy, ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -384,10 +385,10 @@ Write ONLY the review text, no quotes or formatting. Make this review completely
           {currentStep === 'emoji' && (
             <div className="text-center space-y-4 sm:space-y-6">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+                <h1 className="text-2xl sm:text-3xl font-bold text-white">
                   How was your experience with
                 </h1>
-                <div className="flex justify-center mb-2">
+                <div className="flex justify-center -mt-1">
                   <img 
                     src="/lovable-uploads/8de08320-699b-4cbb-bda0-f9a053e5694a.png" 
                     alt="TrueAim AI"
